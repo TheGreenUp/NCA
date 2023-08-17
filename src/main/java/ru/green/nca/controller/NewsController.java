@@ -1,8 +1,6 @@
 package ru.green.nca.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,54 +8,54 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.green.nca.entity.News;
 import ru.green.nca.repository.NewsRepository;
+import ru.green.nca.service.NewsService;
 
 import java.util.List;
-import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/news")
 public class NewsController {
-    private NewsRepository newsRepository;
-    private static Logger logger = LoggerFactory.getLogger(NewsController.class);
+    private final NewsRepository newsRepository;
+    private final NewsService newsService;
 
     @Autowired
-    public NewsController(NewsRepository newsRepository) {
+    public NewsController(NewsRepository newsRepository, NewsService newsService) {
         this.newsRepository = newsRepository;
+        this.newsService = newsService;
     }
 
     @GetMapping
-    public ResponseEntity<List<News>> getNews() {
+    public List<News> getNews() {
         List<News> news = newsRepository.findAll();
-        logger.info("Find all news request");
-        return new ResponseEntity<>(news, HttpStatus.OK);
+        log.info("Find all news request");
+        return news;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<News> getUserById(@PathVariable("id") int newsId) {
-        Optional<News> news = newsRepository.findById(newsId);
-        logger.info("Find news by id = " + newsId + " request");
-        return new ResponseEntity<>(news.orElse(null), HttpStatus.OK);
+    public News getNewsById(@PathVariable("id") int newsId) {
+        return newsService.getNewsById(newsId).getBody();
     }
 
     @PostMapping
     public ResponseEntity<News> createNews(@RequestBody News news) {
         newsRepository.save(news);
-        logger.info("Create news request with next params: " + news.toString());
+        log.info("Create news request with next params: " + news.toString());
         return new ResponseEntity<>(news, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") int newsId) {
+    public ResponseEntity<String> deleteNews(@PathVariable("id") int newsId) {
         newsRepository.deleteById(newsId);
-        logger.info("Delete news by id = " + newsId + " request");
+        log.info("Delete news by id = " + newsId + " request");
         return new ResponseEntity<>("News successfully deleted", HttpStatus.OK);
     }
-    @Transactional
+
     @PutMapping("/{id}")
-    public ResponseEntity<News> updateUser(@PathVariable("id") int newsId, @RequestBody News updatedNews) {
+    public ResponseEntity<News> updateNews(@PathVariable("id") int newsId, @RequestBody News updatedNews) {
         updatedNews.setId(newsId);
         News news = newsRepository.save(updatedNews);
-        logger.info("Update news with id = " + newsId + " with incoming params: " + updatedNews.toString());
+        log.info("Update news with id = " + newsId + " with incoming params: " + updatedNews.toString());
         return new ResponseEntity<>(news, HttpStatus.OK);
     }
 

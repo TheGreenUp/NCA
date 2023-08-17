@@ -7,29 +7,21 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Date;
 
-@Component
 @Table(name = "users")
 @Entity
 
 @Slf4j
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Users {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
-    @Column(name = "username")
     String username;
-    @Column(name = "password")
     String password;
-    @Column(name = "name")
     String name;
-    @Column(name = "surname")
     String surname;
-    @Column(name = "parent_name")
     String parentName;
     @Column(name = "creation_date")
     private Date creationDate;

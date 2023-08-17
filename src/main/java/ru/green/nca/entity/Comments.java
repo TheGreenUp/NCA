@@ -7,21 +7,17 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Date;
 
-@Component
 @Table(name = "comments")
 @Entity
 
 @Slf4j
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Comments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "text")
     private String text;
     @Column(name = "creation_date")
     private Date creationDate;
