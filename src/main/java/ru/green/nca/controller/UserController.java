@@ -16,7 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserController(UserRepository userRepository) {
@@ -39,6 +39,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> createuser(@RequestBody User user) {
+        log.info("Generated password for " + user.getUsername()+" is: " + user.getPassword());
         userRepository.save(user);
         log.info("Create user request with next params: " + user.toString());
         return new ResponseEntity<>(user, HttpStatus.CREATED);

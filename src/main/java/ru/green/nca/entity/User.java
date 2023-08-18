@@ -24,6 +24,7 @@ public class User {
     String surname;
     String parentName;
     @Column(name = "creation_date")
+    @Temporal(TemporalType.DATE)
     private Date creationDate;
     @Column(name = "last_edit_date")
     private Date lastEditDate;

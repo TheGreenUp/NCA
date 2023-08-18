@@ -20,6 +20,7 @@ public class Comments {
     private Integer id;
     private String text;
     @Column(name = "creation_date")
+    @Temporal(TemporalType.DATE)
     private Date creationDate;
     @Column(name = "last_edit_date")
     private Date lastEditDate;

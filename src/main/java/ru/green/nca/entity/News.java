@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "news")
 @Entity
@@ -22,6 +24,7 @@ public class News {
     private String title;
     private String text;
     @Column(name = "creation_date")
+    @Temporal(TemporalType.DATE)
     private Date creationDate;
     @Column(name = "last_edit_date")
     private Date lastEditDate;
@@ -29,4 +32,5 @@ public class News {
     private Integer insertedById;
     @Column(name = "updated_by_id")
     private Integer updatedById;
+
 }
