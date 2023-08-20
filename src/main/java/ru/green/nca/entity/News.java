@@ -22,6 +22,7 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
+    @Column(name = "text", length = 2000)
     private String text;
     @Column(name = "creation_date")
     @Temporal(TemporalType.DATE)
