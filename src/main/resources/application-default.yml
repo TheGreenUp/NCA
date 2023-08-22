@@ -8,6 +8,7 @@
           hibernate:
             dialect: org.hibernate.dialect.PostgreSQLDialect
             default_schema: NCA
+            ddl-auto: update
             jdbc:
               lob:
                 non_contextual_creation: 'true'

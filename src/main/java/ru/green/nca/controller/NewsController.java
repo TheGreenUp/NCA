@@ -1,9 +1,8 @@
 package ru.green.nca.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.green.nca.entity.News;
 import ru.green.nca.model.NewsWithComments;
@@ -14,60 +13,63 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/news")
+@AllArgsConstructor
 public class NewsController {
     private final NewsService newsService;
 
-    @Autowired
-    public NewsController(NewsService newsService) {
-        this.newsService = newsService;
-    }
-
     @GetMapping
-    public ResponseEntity<List<News>> getNews(@RequestParam(defaultValue = "0") int page,
-                                              @RequestParam(defaultValue = "10") int size) {
+    public List<News> getNews(@RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "10") int size) {
+        log.info("Entering 'get all news' endpoint");
         return newsService.getNews(page, size);
     }
 
     @GetMapping("/{id}")
     public News getNewsById(@PathVariable("id") int newsId) {
-        return newsService.getNewsById(newsId).getBody();
+        log.info("Entering 'get news by id' endpoint");
+        return newsService.getNewsById(newsId);
     }
 
     @PostMapping
-    public ResponseEntity<News> createNews(@RequestBody News news) {
+    public News createNews(@RequestBody News news) {
+        log.info("Entering 'create news' endpoint");
         return newsService.createNews(news);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteNews(@PathVariable("id") int newsId) {
-        return newsService.deleteNews(newsId);
+    public void deleteNews(@PathVariable("id") int newsId) {
+        log.info("Entering 'delete news' endpoint");
+        newsService.deleteNews(newsId);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<News> updateNews(@PathVariable("id") int newsId, @RequestBody News updatedNews) {
+    public News updateNews(@PathVariable("id") int newsId, @RequestBody News updatedNews) {
+        log.info("Entering 'update news' endpoint");
         return newsService.updateNews(newsId, updatedNews);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<News>> searchByTitleOrText(@RequestParam String keyword,
-                                                          @RequestParam int page,
-                                                          @RequestParam int size) {
+    public Page<News> searchByTitleOrText(@RequestParam String keyword,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size) {
+        log.info("Entering 'search news' endpoint");
         return newsService.searchByTitleOrText(keyword, page, size);
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<Page<News>> getLatestNews(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    public Page<News> getLatestNews(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "10") int size
     ) {
+        log.info("Entering 'get latest news' endpoint");
         return newsService.getLatestNews(page, size);
     }
 
     @GetMapping("/{newsId}/comments")
-    public ResponseEntity<NewsWithComments> getNewsAndComments(
+    public NewsWithComments getNewsAndComments(
             @PathVariable int newsId,
             @RequestParam(defaultValue = "0") int commentPage,
             @RequestParam(defaultValue = "10") int commentSize) {
+        log.info("Entering 'get news and comments' endpoint");
         return newsService.viewNewsWithComments(newsId, commentPage, commentSize);
     }
 }

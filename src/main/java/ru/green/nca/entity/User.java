@@ -3,9 +3,9 @@ package ru.green.nca.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.sql.Date;
+import java.time.Instant;
 
 @Table(name = "users")
 @Entity
@@ -17,15 +17,14 @@ import java.sql.Date;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
-    String username;
-    String password;
-    String name;
-    String surname;
-    String parentName;
+    private Integer id;
+    private String username;
+    private String password;
+    private String name;
+    private String surname;
+    private String parentName;
     @Column(name = "creation_date")
-    @Temporal(TemporalType.DATE)
-    private Date creationDate;
+    private Instant creationDate;
     @Column(name = "last_edit_date")
-    private Date lastEditDate;
+    private Instant lastEditDate;
 }

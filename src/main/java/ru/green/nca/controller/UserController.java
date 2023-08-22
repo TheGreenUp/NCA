@@ -1,52 +1,48 @@
 package ru.green.nca.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.green.nca.entity.User;
-import ru.green.nca.repository.UserRepository;
 import ru.green.nca.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/users")
+@AllArgsConstructor
 public class UserController {
-    private final UserService userService;
-
-
-    @Autowired
-    public UserController(UserRepository userRepository, UserService userService) {
-        this.userService = userService;
-    }
+    private UserService userService;
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<User> getAllUsers(@RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "10") int size) {
+        log.info("Entering 'get all users' endpoint");
+        return userService.getAllUsers(page, size);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") int userId) {
+    public User getUserById(@PathVariable("id") int userId) {
+        log.info("Entering 'get user by id' endpoint");
         return userService.getUserById(userId);
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public User createUser(@RequestBody User user) {
+        log.info("Entering 'create user' endpoint");
         return userService.createUser(user);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") int userId) {
-        return userService.deleteUser(userId);
+    public void deleteUser(@PathVariable("id") int userId) {
+        log.info("Entering 'delete user' endpoint");
+        userService.deleteUser(userId);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") int userId, @RequestBody User updatedUser) {
+    public User updateUser(@PathVariable("id") int userId, @RequestBody User updatedUser) {
+        log.info("Entering 'update user' endpoint");
         return userService.updateUser(userId, updatedUser);
     }
 }
