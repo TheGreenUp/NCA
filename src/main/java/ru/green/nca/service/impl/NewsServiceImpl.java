@@ -61,10 +61,9 @@ public class NewsServiceImpl implements NewsService {
             News news = optionalNews.get();
             Pageable pageable = PageRequest.of(commentPage, commentSize);
             Page<Comment> commentsPage = commentRepository.findByIdNews(newsId, pageable);
-            //TODO шото пейджы не работают
             return new NewsWithComments(news, commentsPage.getContent());
         } else {
-            return null;
+            throw new ResourceNotFoundException("No news with id = " + newsId + " was found");
         }
     }
 
@@ -87,18 +86,10 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public Page<News> searchByTitleOrText(String keyword, int page, int size) {
+    public List<News> searchByTitleOrText(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<News> newsPage = newsRepository.searchByTitleOrText(keyword, pageable);
         log.debug("Find news by text (or title) = " + keyword + ". Founded news: " + newsPage);
-        return newsPage;
-    }
-
-    @Override
-    public Page<News> getLatestNews(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("creationDate").descending());
-        Page<News> newsPage = newsRepository.findAllByOrderByCreationDateDesc(pageable);
-        log.debug("Trying to find latest news");
-        return newsPage;
+        return newsPage.getContent();
     }
 }

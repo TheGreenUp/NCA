@@ -1,6 +1,5 @@
 package ru.green.nca.service;
 
-import org.springframework.data.domain.Page;
 import ru.green.nca.entity.News;
 import ru.green.nca.model.NewsWithComments;
 
@@ -19,7 +18,6 @@ public interface NewsService {
 
     void deleteNews(int newsId);
 
-    Page<News> searchByTitleOrText(String keyword, int page, int size);
+    List<News> searchByTitleOrText(String keyword, int page, int size);
 
-    Page<News> getLatestNews(int page, int size);
 }

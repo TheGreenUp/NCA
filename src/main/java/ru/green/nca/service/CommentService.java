@@ -9,7 +9,7 @@ public interface CommentService {
 
     Comment getCommentById(int commentId);
 
-    Comment createComments(Comment comment);
+    Comment createComment(Comment comment);
 
     void deleteComment(int commentId);
 

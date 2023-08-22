@@ -33,7 +33,7 @@ public class CommentController {
     public Comment createComment(@RequestBody Comment comment)
     {
         log.info("Entering 'create comment' endpoint");
-        return commentService.createComments(comment);
+        return commentService.createComment(comment);
     }
 
     @DeleteMapping("/{id}")

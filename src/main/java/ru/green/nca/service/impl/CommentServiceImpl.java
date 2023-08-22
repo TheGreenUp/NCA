@@ -36,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
 
     }
     @Override
-    public Comment createComments(Comment comment) {
+    public Comment createComment(Comment comment) {
         commentRepository.save(comment);
         log.debug("Create comments request with next params: " + comment);
         return comment;

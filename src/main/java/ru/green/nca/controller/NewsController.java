@@ -49,19 +49,11 @@ public class NewsController {
     }
 
     @GetMapping("/search")
-    public Page<News> searchByTitleOrText(@RequestParam String keyword,
+    public List<News> searchByTitleOrText(@RequestParam String keyword,
                                           @RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "10") int size) {
         log.info("Entering 'search news' endpoint");
         return newsService.searchByTitleOrText(keyword, page, size);
-    }
-
-    @GetMapping("/latest")
-    public Page<News> getLatestNews(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "10") int size
-    ) {
-        log.info("Entering 'get latest news' endpoint");
-        return newsService.getLatestNews(page, size);
     }
 
     @GetMapping("/{newsId}/comments")
