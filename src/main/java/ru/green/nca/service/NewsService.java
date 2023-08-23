@@ -1,7 +1,7 @@
 package ru.green.nca.service;
 
 import ru.green.nca.entity.News;
-import ru.green.nca.model.NewsWithComments;
+import ru.green.nca.dto.NewsWithCommentsDto;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public interface NewsService {
 
     News createNews(News news);
 
-    NewsWithComments viewNewsWithComments(int newsId, int commentPage, int commentSize);
+    NewsWithCommentsDto viewNewsWithComments(int newsId, int commentPage, int commentSize);
 
     News updateNews(int newsId, News updatedNews);
 

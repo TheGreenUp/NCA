@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.repository.CommentRepository;
+import ru.green.nca.repository.NewsRepository;
 import ru.green.nca.service.impl.CommentServiceImpl;
 
 import java.util.List;
@@ -28,7 +29,9 @@ public class CommentServiceTest {
     private CommentServiceImpl commentService;
     @Mock
     private CommentRepository commentRepository;
-    Comment COMMENT = new Comment(1,"Test comment", null,null,1,1);
+    @Mock
+    private NewsRepository newsRepository;
+    Comment COMMENT = new Comment(1, "Test comment", null, null, 1, 1);
 
     @Test
     public void getByIdTest() {
@@ -40,7 +43,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void getAllCommentTest()  {
+    public void getAllCommentTest() {
         Pageable pageable = PageRequest.of(0, 10); // Создаем объект Pageable для пагинации
         Page<Comment> CommentPage = new PageImpl<>(List.of(COMMENT)); // Создаем объект Page с данными
         when(commentRepository.findAll(pageable)).thenReturn(CommentPage); // Моделируем поведение репозитория
@@ -53,7 +56,8 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void createCommentTest()  {
+    public void createCommentTest() {
+        when(newsRepository.existsById(1)).thenReturn(true);
         when(commentRepository.save(eq(COMMENT))).thenReturn(COMMENT);
         Comment Comment = this.commentService.createComment(COMMENT);
         assertNotNull(Comment); // Проверка, что полученный объект не null
@@ -64,7 +68,7 @@ public class CommentServiceTest {
     @Test
     public void updateCommentTests() {
         // Подготовьте мок repository
-        when(commentRepository.existsById(1)).thenReturn(true); // Симулируем наличие новости с ID 1
+        when(commentRepository.findById(1)).thenReturn(Optional.ofNullable(COMMENT)); // Симулируем наличие новости с ID 1
         when(commentRepository.save(COMMENT)).thenReturn(COMMENT);
 
         // Вызываем метод обновления

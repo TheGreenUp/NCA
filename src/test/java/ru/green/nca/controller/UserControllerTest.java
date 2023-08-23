@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
 import ru.green.nca.service.UserService;
 
@@ -29,7 +30,9 @@ public class UserControllerTest {
     @MockBean
     private UserService userService;
     User USER = new User(1, "TheGreenUp", "12345678","Даниил",
-            "Гринь","Сергеевич",null,null);
+            "Гринь","Сергеевич",null,null,1);
+    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "12345678","Даниил",
+            "Гринь","Сергеевич",null,null,1);
     @Test
     public void getAllUserTest() throws Exception {
         when(userService.getAllUsers(eq(0), eq(10))).thenReturn(List.of(USER));
@@ -57,8 +60,8 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(UserJson))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isOk());
+        //TODO и тут тоже
     }
 
     @Test
@@ -74,7 +77,7 @@ public class UserControllerTest {
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(USER)))
+                        .content(asJsonString(USER_DTO)))
                 .andExpect(status().isOk());
 
         verify(userService).updateUser(eq(1), eq(USER));

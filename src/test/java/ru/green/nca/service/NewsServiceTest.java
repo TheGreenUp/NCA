@@ -11,7 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.News;
-import ru.green.nca.model.NewsWithComments;
+import ru.green.nca.dto.NewsWithCommentsDto;
 import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.NewsRepository;
 import ru.green.nca.service.impl.NewsServiceImpl;
@@ -69,7 +69,7 @@ public class NewsServiceTest {
     @Test
     public void viewNewsWithCommentsTest()  {
         Comment comment = new Comment(10, "test text", null, null, 1, 1);
-        NewsWithComments expectedNewsWithComments = new NewsWithComments(NEWS_1, List.of(comment));
+        NewsWithCommentsDto expectedNewsWithCommentsDto = new NewsWithCommentsDto(NEWS_1, List.of(comment));
 
         // Создаем моки
         Page<Comment> commentsPage = new PageImpl<>(List.of(comment));
@@ -77,20 +77,20 @@ public class NewsServiceTest {
         when(newsRepository.findById(eq(1))).thenReturn(Optional.ofNullable(NEWS_1));
 
         // Вызываем метод
-        NewsWithComments resultNewsWithComments = newsService.viewNewsWithComments(1, 0, 10);
+        NewsWithCommentsDto resultNewsWithCommentsDto = newsService.viewNewsWithComments(1, 0, 10);
 
         // Проверяем, что результат соответствует ожиданиям
-        assertNotNull(resultNewsWithComments);
-        assertEquals(expectedNewsWithComments.getNews().getId(), resultNewsWithComments.getNews().getId());
-        assertEquals(expectedNewsWithComments.getNews().getTitle(), resultNewsWithComments.getNews().getTitle());
-        assertEquals(expectedNewsWithComments.getComments().size(), resultNewsWithComments.getComments().size());
+        assertNotNull(resultNewsWithCommentsDto);
+        assertEquals(expectedNewsWithCommentsDto.getNews().getId(), resultNewsWithCommentsDto.getNews().getId());
+        assertEquals(expectedNewsWithCommentsDto.getNews().getTitle(), resultNewsWithCommentsDto.getNews().getTitle());
+        assertEquals(expectedNewsWithCommentsDto.getComments().size(), resultNewsWithCommentsDto.getComments().size());
         // Добавьте другие проверки, если необходимо
     }
 
     @Test
     public void updateNewsTests()  {
         // Подготовьте мок repository
-        when(newsRepository.existsById(1)).thenReturn(true); // Симулируем наличие новости с ID 1
+        when(newsRepository.findById(1)).thenReturn(Optional.ofNullable(NEWS_1)); // Симулируем наличие новости с ID 1
         when(newsRepository.save(NEWS_1)).thenReturn(NEWS_1);
 
         // Вызываем метод обновления

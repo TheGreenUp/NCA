@@ -25,6 +25,7 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
+
     @Override
     public List<User> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(existingUser);
     }
 
-    private String[] getNullPropertyNames(Object source) {
+    public String[] getNullPropertyNames(Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
         // Получаем свойства объекта
         java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
@@ -82,5 +83,6 @@ public class UserServiceImpl implements UserService {
         String[] result = new String[emptyNames.size()];
         return emptyNames.toArray(result);
     }
+
 }
 

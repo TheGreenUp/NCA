@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Date;
 import java.time.Instant;
 
 /**
@@ -25,46 +24,28 @@ import java.time.Instant;
 @Builder
 
 public class News {
-    /**
-     * Уникальный идентификатор новости.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    /**
-     * Заголовок новости.
-     */
     private String title;
-
-    /**
-     * Текстовое содержание новости.
-     */
     @Column(name = "text", length = 2000)
     private String text;
-
-    /**
-     * Дата создания новости.
-     */
     @Column(name = "creation_date")
     private Instant creationDate;
-
-    /**
-     * Дата последнего редактирования новости.
-     */
     @Column(name = "last_edit_date")
     private Instant lastEditDate;
-
-    /**
-     * Идентификатор пользователя, добавившего новость.
-     */
     @Column(name = "inserted_by_id")
     private Integer insertedById;
-
-    /**
-     * Идентификатор пользователя, последний раз обновившего новость.
-     */
     @Column(name = "updated_by_id")
     private Integer updatedById;
+    @PrePersist
+    public void prePersist() {
+        creationDate = Instant.now();
+        lastEditDate = Instant.now();
+    }
 
+    @PreUpdate
+    public void preUpdate() {
+        lastEditDate = Instant.now();
+    }
 }

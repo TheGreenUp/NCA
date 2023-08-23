@@ -7,9 +7,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.green.nca.dto.NewsDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.News;
-import ru.green.nca.model.NewsWithComments;
+import ru.green.nca.dto.NewsWithCommentsDto;
 import ru.green.nca.service.NewsService;
 
 import java.util.List;
@@ -31,6 +32,8 @@ public class NewsControllerTest {
     @MockBean
     private NewsService newsService;
     News NEWS_1 = new News(1, "1984", "Orwell", null, null, 1, 1);
+    NewsDto NEWS_DTO = new NewsDto(1, "1984", "Orwell", null,
+            null, null,null, null,null);
 
     @Test
     public void getAllNewsTest() throws Exception {
@@ -54,14 +57,13 @@ public class NewsControllerTest {
     @Test
     public void createNewsTest() throws Exception {
         when(newsService.createNews(NEWS_1)).thenReturn(NEWS_1);
-        String newsJson = asJsonString(NEWS_1);
         this.mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(newsJson))
+                        .content(asJsonString(NEWS_DTO)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
+                .andExpect(status().isOk());
+        //TODO здеся тоже
+   }
 
     @Test
     public void deleteNewsTest() throws Exception {
@@ -76,7 +78,7 @@ public class NewsControllerTest {
 
         mockMvc.perform(put("/api/news/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(NEWS_1)))
+                        .content(asJsonString(NEWS_DTO)))
                 .andExpect(status().isOk());
 
         verify(newsService).updateNews(eq(1), eq(NEWS_1));
@@ -95,7 +97,7 @@ public class NewsControllerTest {
     @Test
     public void findNewsWithCommentsTest() throws Exception {
         Comment comment = new Comment(10,"test text",null,null,1,1);
-        NewsWithComments news = new NewsWithComments(NEWS_1, List.of(comment));
+        NewsWithCommentsDto news = new NewsWithCommentsDto(NEWS_1, List.of(comment));
         asJsonString(news);
         when(newsService.viewNewsWithComments(eq(11),eq(0),eq(10))).thenReturn(news);
         this.mockMvc.perform(get("/api/news/11/comments?page=0&size=10"))

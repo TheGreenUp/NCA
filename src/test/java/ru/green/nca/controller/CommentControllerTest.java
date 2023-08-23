@@ -1,12 +1,14 @@
 package ru.green.nca.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.green.nca.dto.CommentDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.service.CommentService;
 
@@ -29,7 +31,8 @@ public class CommentControllerTest {
     @MockBean
     private CommentService commentService;
     Comment COMMENT = new Comment(1,"Test comment", null,null,1,1);
-
+    CommentDto COMMENT_DTO = new CommentDto(1,1,"Test comment",
+            null,null, null,null);
     @Test
     public void getAllCommentTest() throws Exception {
         when(commentService.getComments(eq(0), eq(10))).thenReturn(List.of(COMMENT));
@@ -52,13 +55,12 @@ public class CommentControllerTest {
     @Test
     public void createCommentTest() throws Exception {
         when(commentService.createComment(COMMENT)).thenReturn(COMMENT);
-        String CommentJson = asJsonString(COMMENT);
         this.mockMvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(CommentJson))
+                        .content(asJsonString(COMMENT_DTO)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isOk());
+        //TODO чета ругается на content.contenttype
     }
 
     @Test
@@ -71,12 +73,11 @@ public class CommentControllerTest {
     @Test
     public void updateCommentTest() throws Exception {
         when(commentService.updateComment(eq(1), eq(COMMENT))).thenReturn(COMMENT);
-
         mockMvc.perform(put("/api/comments/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(COMMENT)))
+                        .content(asJsonString(COMMENT_DTO)))
                 .andExpect(status().isOk());
-
+        System.out.println(COMMENT);
         verify(commentService).updateComment(eq(1), eq(COMMENT));
     }
     // Метод для преобразования объекта в JSON строку

@@ -30,7 +30,7 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     User USER = new User(1, "TheGreenUp", "12345678","Даниил",
-            "Гринь","Сергеевич",null,null);
+            "Гринь","Сергеевич",null,null,1);
 
     @Test
     public void getByIdTest()  {

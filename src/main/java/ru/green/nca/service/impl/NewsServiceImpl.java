@@ -2,22 +2,26 @@ package ru.green.nca.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.News;
 import ru.green.nca.exceptions.NoDataFoundException;
 import ru.green.nca.exceptions.ResourceNotFoundException;
-import ru.green.nca.model.NewsWithComments;
+import ru.green.nca.dto.NewsWithCommentsDto;
 import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.NewsRepository;
 import ru.green.nca.service.NewsService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -55,13 +59,13 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public NewsWithComments viewNewsWithComments(int newsId, int commentPage, int commentSize) {
+    public NewsWithCommentsDto viewNewsWithComments(int newsId, int commentPage, int commentSize) {
         Optional<News> optionalNews = newsRepository.findById(newsId);
         if (optionalNews.isPresent()) {
             News news = optionalNews.get();
             Pageable pageable = PageRequest.of(commentPage, commentSize);
             Page<Comment> commentsPage = commentRepository.findByIdNews(newsId, pageable);
-            return new NewsWithComments(news, commentsPage.getContent());
+            return new NewsWithCommentsDto(news, commentsPage.getContent());
         } else {
             throw new ResourceNotFoundException("No news with id = " + newsId + " was found");
         }
@@ -69,20 +73,20 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public News updateNews(int newsId, News updatedNews) {
-        if (newsRepository.existsById(newsId)) {
-            updatedNews.setId(newsId); //устанавливаем переданный в url id обновленному пользователю
-            newsRepository.save(updatedNews);
-            log.debug("Update news with id = " + newsId + " with incoming params: " + updatedNews);
-            return updatedNews;
-        } else {
-            throw new ResourceNotFoundException("Unable to update news. No news with id = " + newsId + " was found.");
-        }
+        News existingNews = newsRepository.findById(newsId)
+                .orElseThrow(() -> new ResourceNotFoundException("Unable to update news. No news with id = " + newsId + " was found."));
+
+        BeanUtils.copyProperties(updatedNews, existingNews, getNullPropertyNames(updatedNews));
+
+        log.debug("Update news with id = " + newsId + " with incoming params: " + updatedNews);
+        return newsRepository.save(existingNews);
+
     }
 
     @Override
     public void deleteNews(int newsId) {
-            newsRepository.deleteById(newsId);
-            log.debug("News with id = " + newsId + " was successfully deleted (maybe).");
+        newsRepository.deleteById(newsId);
+        log.debug("News with id = " + newsId + " was successfully deleted (maybe).");
     }
 
     @Override
@@ -92,4 +96,24 @@ public class NewsServiceImpl implements NewsService {
         log.debug("Find news by text (or title) = " + keyword + ". Founded news: " + newsPage);
         return newsPage.getContent();
     }
+
+    public String[] getNullPropertyNames(Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        // Получаем свойства объекта
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+        // Создаем множество для хранения имен свойств, значение которых null
+        Set<String> emptyNames = new HashSet<>();
+        for (java.beans.PropertyDescriptor pd : pds) {
+            // Получаем значение свойства
+            Object srcValue = src.getPropertyValue(pd.getName());
+
+            // Если значение свойства равно null, добавляем имя свойства в множество
+            if (srcValue == null) {
+                emptyNames.add(pd.getName());
+            }
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
+    }
+
 }

@@ -32,4 +32,15 @@ public class Comment {
     private Integer insertedById;
     @Column(name = "id_news")
     private Integer idNews;
+
+    @PrePersist
+    public void prePersist() {
+        creationDate = Instant.now();
+        lastEditDate = Instant.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        lastEditDate = Instant.now();
+    }
 }

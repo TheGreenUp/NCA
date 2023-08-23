@@ -5,7 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.green.nca.dto.CommentDto;
+import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.Comment;
+import ru.green.nca.entity.User;
 import ru.green.nca.service.CommentService;
 
 import java.util.List;
@@ -30,10 +33,10 @@ public class CommentController {
     }
 
     @PostMapping
-    public Comment createComment(@RequestBody Comment comment)
+    public Comment createComment(@RequestBody CommentDto commentDto)
     {
         log.info("Entering 'create comment' endpoint");
-        return commentService.createComment(comment);
+        return commentService.createComment(convertToComment(commentDto));
     }
 
     @DeleteMapping("/{id}")
@@ -43,8 +46,19 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public Comment updateComment(@PathVariable("id") int commentsId, @RequestBody Comment updatedComment) {
+    public Comment updateComment(@PathVariable("id") int commentsId, @RequestBody CommentDto updatedCommentDto) {
         log.info("Entering 'update comment' endpoint");
-        return commentService.updateComment(commentsId,updatedComment);
+        updatedCommentDto.setId(commentsId);
+        return commentService.updateComment(commentsId, convertToComment(updatedCommentDto));
+        //TODO тута с конвертацией проблемы возникают
+    }
+    private Comment convertToComment(CommentDto commentDto) {
+        Comment comment = new Comment();
+        comment.setId(commentDto.getId());
+        comment.setText(commentDto.getText());
+        comment.setIdNews(commentDto.getIdNews());
+        //TODO вот с этим тоже разобраться
+        comment.setInsertedById(1);
+        return comment;
     }
 }

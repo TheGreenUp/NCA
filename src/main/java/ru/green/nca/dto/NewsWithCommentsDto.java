@@ -1,13 +1,15 @@
 package ru.green.nca.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import ru.green.nca.entity.Comment;
+import ru.green.nca.entity.News;
+
 import java.util.List;
-
+@Data
+@AllArgsConstructor
 public class NewsWithCommentsDto {
-    private NewsDto news;
-    private List<CommentDto> comments;
+    private News news;
+    private List<Comment> comments;
 
-    public NewsWithCommentsDto(NewsDto news, List<CommentDto> comments) {
-        this.news = news;
-        this.comments = comments;
-    }
 }

@@ -15,4 +15,6 @@ public interface UserService {
     void deleteUser(int userId);
 
     User updateUser(int userId, User updatedUser);
+
+    String[] getNullPropertyNames(Object source);
 }

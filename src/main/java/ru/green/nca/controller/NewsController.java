@@ -2,10 +2,10 @@ package ru.green.nca.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import ru.green.nca.dto.NewsDto;
 import ru.green.nca.entity.News;
-import ru.green.nca.model.NewsWithComments;
+import ru.green.nca.dto.NewsWithCommentsDto;
 import ru.green.nca.service.NewsService;
 
 import java.util.List;
@@ -31,9 +31,9 @@ public class NewsController {
     }
 
     @PostMapping
-    public News createNews(@RequestBody News news) {
+    public News createNews(@RequestBody NewsDto newsDto) {
         log.info("Entering 'create news' endpoint");
-        return newsService.createNews(news);
+        return newsService.createNews(convertToNews(newsDto));
     }
 
     @DeleteMapping("/{id}")
@@ -43,9 +43,10 @@ public class NewsController {
     }
 
     @PutMapping("/{id}")
-    public News updateNews(@PathVariable("id") int newsId, @RequestBody News updatedNews) {
+    public News updateNews(@PathVariable("id") int newsId, @RequestBody NewsDto updatedNewsDto) {
         log.info("Entering 'update news' endpoint");
-        return newsService.updateNews(newsId, updatedNews);
+        updatedNewsDto.setId(newsId);
+        return newsService.updateNews(newsId, convertToNews(updatedNewsDto));
     }
 
     @GetMapping("/search")
@@ -57,12 +58,23 @@ public class NewsController {
     }
 
     @GetMapping("/{newsId}/comments")
-    public NewsWithComments getNewsAndComments(
+    public NewsWithCommentsDto getNewsAndComments(
             @PathVariable int newsId,
             @RequestParam(defaultValue = "0") int commentPage,
             @RequestParam(defaultValue = "10") int commentSize) {
         log.info("Entering 'get news and comments' endpoint");
         return newsService.viewNewsWithComments(newsId, commentPage, commentSize);
+    }
+
+    private News convertToNews(NewsDto newsDto) {
+        News news = new News();
+        news.setId(newsDto.getId());
+        news.setTitle(newsDto.getTitle());
+        news.setText(newsDto.getText());
+        //TODO необходимо через spring security получать данные и вставлять сюда
+        news.setInsertedById(1);
+        news.setUpdatedById(1);
+        return news;
     }
 }
 

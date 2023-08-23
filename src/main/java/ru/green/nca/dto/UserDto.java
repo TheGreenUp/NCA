@@ -1,7 +1,12 @@
 package ru.green.nca.dto;
-import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+import java.time.Instant;
+@Data
+@AllArgsConstructor
 public class UserDto {
+    private int id;
     private String username;
     private String password;
     private String name;
@@ -9,4 +14,6 @@ public class UserDto {
     private String parentName;
     private Instant creationDate;
     private Instant lastEditDate;
+    private int roleId;
+
 }
