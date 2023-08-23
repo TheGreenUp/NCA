@@ -62,13 +62,12 @@ public class NewsControllerTest {
 
     @Test
     public void createNewsTest() throws Exception {
-        when(newsService.createNews(NEWS_1)).thenReturn(NEWS_1);
+        when(newsService.createNews(NEWS_DTO)).thenReturn(NEWS_1);
         this.mockMvc.perform(post("/api/news")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(NEWS_DTO)))
                 .andDo(print())
                 .andExpect(status().isOk());
-        //TODO здеся тоже
    }
 
     @Test
@@ -80,14 +79,14 @@ public class NewsControllerTest {
 
     @Test
     public void updateNewsTest() throws Exception {
-        when(newsService.updateNews(eq(1), eq(NEWS_1))).thenReturn(NEWS_1);
+        when(newsService.updateNews(eq(1), eq(NEWS_DTO))).thenReturn(NEWS_1);
 
         mockMvc.perform(put("/api/news/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(NEWS_DTO)))
                 .andExpect(status().isOk());
 
-        verify(newsService).updateNews(eq(1), eq(NEWS_1));
+        verify(newsService).updateNews(eq(1), eq(NEWS_DTO));
     }
 
     @Test

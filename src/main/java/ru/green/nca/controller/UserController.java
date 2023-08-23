@@ -34,7 +34,7 @@ public class UserController {
     @PostMapping
     public User createUser(@RequestBody UserDto userDto) {
         log.info("Entering 'create user' endpoint");
-        return userService.createUser(convertToUser(userDto));
+        return userService.createUser(userDto);
     }
 
 
@@ -48,19 +48,7 @@ public class UserController {
     public User updateUser(@PathVariable("id") int userId, @RequestBody UserDto updatedUserDto) {
         updatedUserDto.setId(userId);
         log.info("Entering 'update user' endpoint");
-        return userService.updateUser(userId, convertToUser(updatedUserDto));
+        return userService.updateUser(userId, updatedUserDto);
     }
-    private User convertToUser(UserDto userDto) {
-        User user = new User();
-        user.setId(userDto.getId());
-        user.setUsername(userDto.getUsername());
-        //TODO automatic password set
-        user.setPassword(userDto.getPassword());
-        user.setName(userDto.getName());
-        user.setSurname(userDto.getSurname());
-        user.setParentName(userDto.getParentName());
-        //TODO с этим тоже разобраться нужно
-        user.setRoleId(1);
-        return user;
-    }
+
 }

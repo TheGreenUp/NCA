@@ -8,7 +8,11 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.green.nca.dto.NewsDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.News;
 import ru.green.nca.exceptions.NoDataFoundException;
@@ -16,11 +20,11 @@ import ru.green.nca.exceptions.ResourceNotFoundException;
 import ru.green.nca.dto.NewsWithCommentsDto;
 import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.NewsRepository;
+import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.NewsService;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -31,7 +35,6 @@ public class NewsServiceImpl implements NewsService {
     private NewsRepository newsRepository;
     private CommentRepository commentRepository;
 
-
     @Override
     public News getNewsById(int newsId) {
         return newsRepository.findById(newsId)
@@ -41,7 +44,6 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<News> getNews(int page, int size) {
-        //TODO добавить комменты про пагинацию
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
         Page<News> newsPage = newsRepository.findAll(pageable);
         if (newsPage.isEmpty()) {
@@ -52,27 +54,26 @@ public class NewsServiceImpl implements NewsService {
     }
 
     @Override
-    public News createNews(News news) {
-        newsRepository.save(news);
-        log.debug("Create news request with next params: " + news);
-        return news;
+    public News createNews(NewsDto newsDto) {
+        News news = convertToNews(newsDto);
+        setInsertedById(news);
+        log.debug("Create news request with next params: " + newsDto);
+        return newsRepository.save(news);
     }
 
     @Override
     public NewsWithCommentsDto viewNewsWithComments(int newsId, int commentPage, int commentSize) {
-        Optional<News> optionalNews = newsRepository.findById(newsId);
-        if (optionalNews.isPresent()) {
-            News news = optionalNews.get();
-            Pageable pageable = PageRequest.of(commentPage, commentSize);
-            Page<Comment> commentsPage = commentRepository.findByIdNews(newsId, pageable);
-            return new NewsWithCommentsDto(news, commentsPage.getContent());
-        } else {
-            throw new ResourceNotFoundException("No news with id = " + newsId + " was found");
-        }
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new ResourceNotFoundException("No news with id = " + newsId + " was found"));
+        Pageable pageable = PageRequest.of(commentPage, commentSize);
+        Page<Comment> commentsPage = commentRepository.findByIdNews(newsId, pageable);
+        return new NewsWithCommentsDto(news, commentsPage.getContent());
     }
 
     @Override
-    public News updateNews(int newsId, News updatedNews) {
+    public News updateNews(int newsId, NewsDto updatedNewsDto) {
+        News updatedNews = convertToNews(updatedNewsDto);
+        setUpdatedUserId(updatedNews);
         News existingNews = newsRepository.findById(newsId)
                 .orElseThrow(() -> new ResourceNotFoundException("Unable to update news. No news with id = " + newsId + " was found."));
 
@@ -114,6 +115,28 @@ public class NewsServiceImpl implements NewsService {
         }
         String[] result = new String[emptyNames.size()];
         return emptyNames.toArray(result);
+    }
+
+    private News convertToNews(NewsDto newsDto) {
+        News news = new News();
+        news.setId(newsDto.getId());
+        news.setTitle(newsDto.getTitle());
+        news.setText(newsDto.getText());
+        return news;
+    }
+
+    private void setUpdatedUserId(News news){
+        news.setUpdatedById(getCurrentUserId());
+    }
+    private void setInsertedById(News news){
+        news.setInsertedById(getCurrentUserId());
+    }
+    private int getCurrentUserId(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) return 1;
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetailsImpl userDetails1 = (UserDetailsImpl) userDetails;
+        return userDetails1.getUser().getId();
     }
 
 }

@@ -9,5 +9,4 @@ import ru.green.nca.entity.News;
 public interface NewsRepository extends JpaRepository<News,Integer> {
     @Query("SELECT n FROM News n WHERE n.title LIKE %:keyword% OR n.text LIKE %:keyword%")
     Page<News> searchByTitleOrText(String keyword, Pageable pageable);
-    Page<News> findAllByOrderByCreationDateDesc(Pageable pageable);
 }

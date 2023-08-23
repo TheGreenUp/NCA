@@ -14,4 +14,5 @@ public class NcaApplication {
 	public ModelMapper modelMapper(){
 		return new ModelMapper();
 	}
+
 }

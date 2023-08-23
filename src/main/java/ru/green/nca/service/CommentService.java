@@ -1,5 +1,6 @@
 package ru.green.nca.service;
 
+import ru.green.nca.dto.CommentDto;
 import ru.green.nca.entity.Comment;
 
 import java.util.List;
@@ -9,9 +10,9 @@ public interface CommentService {
 
     Comment getCommentById(int commentId);
 
-    Comment createComment(Comment comment);
+    Comment createComment(CommentDto comment);
 
     void deleteComment(int commentId);
 
-    Comment updateComment(int commentsId, Comment updatedComment);
+    Comment updateComment(int commentsId, CommentDto updatedComment);
 }

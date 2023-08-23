@@ -41,8 +41,6 @@ public class UserControllerTest {
     @Test
     public void getAllUserTest() throws Exception {
         when(userService.getAllUsers(eq(0), eq(10))).thenReturn(List.of(USER));
-        //сверху мы описываем поведение, что будет, если передадим 0 и 10 в качестве параметров
-        //а снизу мы вызываем с этими параметрами, на что получаем результат из thenReturn()
         this.mockMvc.perform(get("/api/users?page=0&size=10"))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -59,14 +57,13 @@ public class UserControllerTest {
 
     @Test
     public void createUserTest() throws Exception {
-        when(userService.createUser(USER)).thenReturn(USER);
+        when(userService.createUser(USER_DTO)).thenReturn(USER);
         String UserJson = asJsonString(USER);
         this.mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(UserJson))
                 .andDo(print())
                 .andExpect(status().isOk());
-        //TODO и тут тоже
     }
 
     @Test
@@ -78,14 +75,14 @@ public class UserControllerTest {
 
     @Test
     public void updateUserTest() throws Exception {
-        when(userService.updateUser(eq(1), eq(USER))).thenReturn(USER);
+        when(userService.updateUser(eq(1), eq(USER_DTO))).thenReturn(USER);
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(USER_DTO)))
                 .andExpect(status().isOk());
 
-        verify(userService).updateUser(eq(1), eq(USER));
+        verify(userService).updateUser(eq(1), eq(USER_DTO));
     }
     // Метод для преобразования объекта в JSON строку
     private static String asJsonString(final Object obj) {

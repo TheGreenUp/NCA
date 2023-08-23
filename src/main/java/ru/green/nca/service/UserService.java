@@ -1,5 +1,6 @@
 package ru.green.nca.service;
 
+import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
 
 import java.util.List;
@@ -10,11 +11,11 @@ public interface UserService {
 
     User getUserById(int userId);
 
-    User createUser(User user);
+    User createUser(UserDto userDto);
 
     void deleteUser(int userId);
 
-    User updateUser(int userId, User updatedUser);
+    User updateUser(int userId, UserDto updatedUserDto);
 
     String[] getNullPropertyNames(Object source);
 }

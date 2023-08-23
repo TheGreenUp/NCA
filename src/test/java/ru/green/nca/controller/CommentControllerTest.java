@@ -45,16 +45,13 @@ public class CommentControllerTest {
 
     @Test
     public void getAllCommentTest() throws Exception {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        when(commentService.getComments(eq(0), eq(10))).thenReturn(List.of(COMMENT));
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
+        when(commentService.getComments(eq(0),eq(10))).thenReturn(List.of(COMMENT));
         //сверху мы описываем поведение, что будет, если передадим 0 и 10 в качестве параметров
         //а снизу мы вызываем с этими параметрами, на что получаем результат из thenReturn()
         this.mockMvc.perform(get("/api/comments?page=0&size=10"))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -68,13 +65,13 @@ public class CommentControllerTest {
 
     @Test
     public void createCommentTest() throws Exception {
-        when(commentService.createComment(COMMENT)).thenReturn(COMMENT);
+        when(commentService.createComment(COMMENT_DTO)).thenReturn(COMMENT);
         this.mockMvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(COMMENT_DTO)))
                 .andDo(print())
-                .andExpect(status().isOk());
-        //TODO чета ругается на content.contenttype
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -86,13 +83,13 @@ public class CommentControllerTest {
 
     @Test
     public void updateCommentTest() throws Exception {
-        when(commentService.updateComment(eq(1), eq(COMMENT))).thenReturn(COMMENT);
+        when(commentService.updateComment(eq(1), eq(COMMENT_DTO))).thenReturn(COMMENT);
         mockMvc.perform(put("/api/comments/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(COMMENT_DTO)))
                 .andExpect(status().isOk());
         System.out.println(COMMENT);
-        verify(commentService).updateComment(eq(1), eq(COMMENT));
+        verify(commentService).updateComment(eq(1), eq(COMMENT_DTO));
     }
 
     // Метод для преобразования объекта в JSON строку

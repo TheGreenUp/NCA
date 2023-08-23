@@ -5,14 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
 import ru.green.nca.exceptions.NoDataFoundException;
 import ru.green.nca.exceptions.ResourceNotFoundException;
 import ru.green.nca.repository.UserRepository;
+import ru.green.nca.security.RandomPasswordGenerator;
+import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.UserService;
 
 import java.util.HashSet;
@@ -24,15 +33,14 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
-
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
-        //TODO захардкожено, переделать бы
         Page<User> userPage = userRepository.findAll(pageable);
         if (userPage.isEmpty()) {
-            log.warn("No news was found");
+            log.warn("No users were found");
             throw new NoDataFoundException("No users were found");
         }
         return userPage.getContent();
@@ -45,9 +53,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
-        userRepository.save(user);
-        return user;
+    public User createUser(UserDto userDto) {
+        return userRepository.save(convertToUser(userDto));
     }
 
     @Override
@@ -56,9 +63,10 @@ public class UserServiceImpl implements UserService {
         log.debug("User with id = " + userId + " was successfully deleted (maybe).");
     }
 
-    public User updateUser(int userId, User updatedUser) {
+    public User updateUser(int userId, UserDto updatedUserDto) {
+        User updatedUser = convertToUser(updatedUserDto);
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id = " + userId + "  found"));
         // Игнорируем null значения при копировании свойств
         BeanUtils.copyProperties(updatedUser, existingUser, getNullPropertyNames(updatedUser));
 
@@ -84,5 +92,26 @@ public class UserServiceImpl implements UserService {
         return emptyNames.toArray(result);
     }
 
+    private User convertToUser(UserDto userDto) {
+        User user = new User();
+        user.setId(userDto.getId());
+        user.setUsername(userDto.getUsername());
+        String randomPassword = RandomPasswordGenerator.generateRandomPassword();
+        user.setPassword(passwordEncoder.encode(randomPassword));
+        user.setName(userDto.getName());
+        user.setSurname(userDto.getSurname());
+        user.setParentName(userDto.getParentName());
+        user.setRoleId(userDto.getRoleId());
+        log.info("Request from userId = " + getCurrentUser().getId() + " to create/update new user." +
+                " New user data:\nUsername: "+ user.getUsername()+ "\nPassword: " + randomPassword);
+        return user;
+    }
+
+    private User getCurrentUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetailsImpl userDetails1 = (UserDetailsImpl) userDetails;
+        return userDetails1.getUser();
+    }
 }
 

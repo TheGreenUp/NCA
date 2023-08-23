@@ -13,4 +13,7 @@ spring:
           lob:
             non_contextual_creation: 'true'
     hibernate: 'null'
+
 jwt_secret: pancakes
+
+maxPageSize: 100

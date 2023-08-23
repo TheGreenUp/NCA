@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import ru.green.nca.dto.NewsDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.News;
 import ru.green.nca.dto.NewsWithCommentsDto;
@@ -34,36 +35,37 @@ public class NewsServiceTest {
     @Mock
     private CommentRepository commentRepository;
     News NEWS_1 = new News(5, "1984", "Orwell", null, null, 1, 1);
-
+    NewsDto NEWS_DTO = new NewsDto(1, "1984", "Orwell", null,
+            null, null,null, null,null);
     @Test
     public void getByIdTest()  {
         when(newsRepository.findById(eq(5))).thenReturn(Optional.of(NEWS_1));
         News newsById = this.newsService.getNewsById(5);
-        assertNotNull(newsById); // Проверка, что полученный объект не null
-        assertEquals(NEWS_1.getId(), newsById.getId()); // Проверка, что id совпадает
-        assertEquals(NEWS_1.getTitle(), newsById.getTitle()); // Проверка, что title совпадает
+        assertNotNull(newsById);
+        assertEquals(NEWS_1.getId(), newsById.getId());
+        assertEquals(NEWS_1.getTitle(), newsById.getTitle());
     }
 
     @Test
     public void getAllNewsTest()  {
-        Pageable pageable = PageRequest.of(0, 10); // Создаем объект Pageable для пагинации
-        Page<News> newsPage = new PageImpl<>(List.of(NEWS_1)); // Создаем объект Page с данными
-        when(newsRepository.findAll(pageable)).thenReturn(newsPage); // Моделируем поведение репозитория
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<News> newsPage = new PageImpl<>(List.of(NEWS_1));
+        when(newsRepository.findAll(pageable)).thenReturn(newsPage);
 
         List<News> news = this.newsService.getNews(0, 10);
 
-        assertNotNull(news); // Проверка, что полученный объект не null
-        assertEquals(1, news.size()); // Проверка, что список содержит 1 элемент
-        assertEquals(NEWS_1, news.get(0)); // Проверка, что элемент соответствует ожидаемому
+        assertNotNull(news);
+        assertEquals(1, news.size());
+        assertEquals(NEWS_1, news.get(0));
     }
 
     @Test
     public void createNewsTest()  {
-        when(newsRepository.save(eq(NEWS_1))).thenReturn(NEWS_1);
-        News news = this.newsService.createNews(NEWS_1);
-        assertNotNull(news); // Проверка, что полученный объект не null
-        assertEquals(NEWS_1.getId(), news.getId()); // Проверка, что id совпадает
-        assertEquals(NEWS_1.getTitle(), news.getTitle()); // Проверка, что title совпадает
+        when(newsRepository.save(any(News.class))).thenReturn(NEWS_1);
+        News news = this.newsService.createNews(NEWS_DTO);
+        assertNotNull(news);
+        assertEquals(NEWS_1.getId(), news.getId());
+        assertEquals(NEWS_1.getTitle(), news.getTitle());
     }
 
     @Test
@@ -76,47 +78,37 @@ public class NewsServiceTest {
         when(commentRepository.findByIdNews(eq(1), any(Pageable.class))).thenReturn(commentsPage);
         when(newsRepository.findById(eq(1))).thenReturn(Optional.ofNullable(NEWS_1));
 
-        // Вызываем метод
         NewsWithCommentsDto resultNewsWithCommentsDto = newsService.viewNewsWithComments(1, 0, 10);
 
-        // Проверяем, что результат соответствует ожиданиям
         assertNotNull(resultNewsWithCommentsDto);
         assertEquals(expectedNewsWithCommentsDto.getNews().getId(), resultNewsWithCommentsDto.getNews().getId());
         assertEquals(expectedNewsWithCommentsDto.getNews().getTitle(), resultNewsWithCommentsDto.getNews().getTitle());
         assertEquals(expectedNewsWithCommentsDto.getComments().size(), resultNewsWithCommentsDto.getComments().size());
-        // Добавьте другие проверки, если необходимо
     }
 
     @Test
     public void updateNewsTests()  {
-        // Подготовьте мок repository
         when(newsRepository.findById(1)).thenReturn(Optional.ofNullable(NEWS_1)); // Симулируем наличие новости с ID 1
         when(newsRepository.save(NEWS_1)).thenReturn(NEWS_1);
 
-        // Вызываем метод обновления
-        News updatedNews = newsService.updateNews(1, NEWS_1);
+        News updatedNews = newsService.updateNews(1, NEWS_DTO);
 
-        // Проверки
         assertNotNull(updatedNews);
         assertEquals(NEWS_1.getId(), updatedNews.getId());
         assertEquals(NEWS_1.getTitle(), updatedNews.getTitle());
-        // Добавьте другие проверки, если необходимо
     }
 
     @Test
     public void deleteNewsTest()  {
-        // Mock the behavior of the repository's deleteById method
         doNothing().when(newsRepository).deleteById(5);
-        // Call the service method to delete the news
         newsService.deleteNews(5);
-        // Verify that the delete method was called with the correct ID
         verify(newsRepository, times(1)).deleteById(5);
     }
 
     @Test
     public void searchByTitleOrTextTest()  {
-        Pageable pageable = PageRequest.of(0, 10); // Создаем объект Pageable для пагинации
-        Page<News> newsPage = new PageImpl<>(List.of(NEWS_1)); // Создаем объект Page с данными
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<News> newsPage = new PageImpl<>(List.of(NEWS_1));
         when(newsRepository.searchByTitleOrText(eq("1984"), eq(pageable))).thenReturn(newsPage);
         List<News> news = this.newsService.searchByTitleOrText("1984", 0, 10);
         assertNotNull(news);

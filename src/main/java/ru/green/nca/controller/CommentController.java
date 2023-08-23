@@ -27,10 +27,6 @@ public class CommentController {
     public List<Comment> getComments(@RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "10") int size) {
         log.info("Entering 'get all comments' endpoint");
-
-       // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      // UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
         return commentService.getComments(page,size);
     }
 
@@ -44,7 +40,7 @@ public class CommentController {
     public Comment createComment(@RequestBody CommentDto commentDto)
     {
         log.info("Entering 'create comment' endpoint");
-        return commentService.createComment(convertToComment(commentDto));
+        return commentService.createComment(commentDto);
     }
 
     @DeleteMapping("/{id}")
@@ -57,16 +53,6 @@ public class CommentController {
     public Comment updateComment(@PathVariable("id") int commentsId, @RequestBody CommentDto updatedCommentDto) {
         log.info("Entering 'update comment' endpoint");
         updatedCommentDto.setId(commentsId);
-        return commentService.updateComment(commentsId, convertToComment(updatedCommentDto));
-        //TODO тута с конвертацией проблемы возникают
-    }
-    private Comment convertToComment(CommentDto commentDto) {
-        Comment comment = new Comment();
-        comment.setId(commentDto.getId());
-        comment.setText(commentDto.getText());
-        comment.setIdNews(commentDto.getIdNews());
-        //TODO вот с этим тоже разобраться
-        comment.setInsertedById(1);
-        return comment;
+        return commentService.updateComment(commentsId, updatedCommentDto);
     }
 }

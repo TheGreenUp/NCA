@@ -9,8 +9,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
 import ru.green.nca.repository.UserRepository;
+import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.impl.UserServiceImpl;
 
 import java.util.List;
@@ -29,63 +36,83 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    User USER = new User(1, "TheGreenUp", "12345678","Даниил",
+    User USER = new User(1, "TheGreenUp", "encodedPassword","Даниил",
+            "Гринь","Сергеевич",null,null,1);
+    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "encodedPassword","Даниил",
             "Гринь","Сергеевич",null,null,1);
 
     @Test
     public void getByIdTest()  {
         when(userRepository.findById(eq(5))).thenReturn(Optional.of(USER));
         User userById = this.userService.getUserById(5);
-        assertNotNull(userById); // Проверка, что полученный объект не null
-        assertEquals(USER.getId(), userById.getId()); // Проверка, что id совпадает
-        assertEquals(USER.getName(), userById.getName()); // Проверка, что title совпадает
+        assertNotNull(userById);
+        assertEquals(USER.getId(), userById.getId());
+        assertEquals(USER.getName(), userById.getName());
     }
 
     @Test
     public void getAllUserTest()  {
-        Pageable pageable = PageRequest.of(0, 10); // Создаем объект Pageable для пагинации
-        Page<User> UserPage = new PageImpl<>(List.of(USER)); // Создаем объект Page с данными
-        when(userRepository.findAll(pageable)).thenReturn(UserPage); // Моделируем поведение репозитория
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<User> UserPage = new PageImpl<>(List.of(USER));
+        when(userRepository.findAll(pageable)).thenReturn(UserPage);
 
         List<User> User = this.userService.getAllUsers(0, 10);
 
-        assertNotNull(User); // Проверка, что полученный объект не null
-        assertEquals(1, User.size()); // Проверка, что список содержит 1 элемент
-        assertEquals(USER, User.get(0)); // Проверка, что элемент соответствует ожидаемому
+        assertNotNull(User);
+        assertEquals(1, User.size());
+        assertEquals(USER, User.get(0));
     }
 
     @Test
-    public void createUserTest()  {
+    public void createUserTest() {
+        securityConfiguration();
+        PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
+        when(passwordEncoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
+
+        UserService userService = new UserServiceImpl(userRepository, passwordEncoderMock);
+
         when(userRepository.save(eq(USER))).thenReturn(USER);
-        User User = this.userService.createUser(USER);
-        assertNotNull(User); // Проверка, что полученный объект не null
-        assertEquals(USER.getId(), User.getId()); // Проверка, что id совпадает
-        assertEquals(USER.getName(), User.getName()); // Проверка, что title совпадает
+
+        User createdUser = userService.createUser(USER_DTO);
+
+        assertNotNull(createdUser);
+        assertEquals(USER.getId(), createdUser.getId());
+        assertEquals(USER.getName(), createdUser.getName());
     }
+
 
     @Test
     public void updateUserTest()  {
-        // Подготовьте мок repository
-        when(userRepository.findById(1)).thenReturn(Optional.of(USER)); // Симулируем наличие пользователя с ID 1
+        securityConfiguration();
+
+        PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
+        when(passwordEncoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
+
+        UserServiceImpl userService = new UserServiceImpl(userRepository, passwordEncoderMock);
+
+
+        when(userRepository.findById(1)).thenReturn(Optional.of(USER));
         when(userRepository.save(USER)).thenReturn(USER);
 
-        // Вызываем метод обновления
-        User updatedUser = userService.updateUser(1, USER);
+        User updatedUser = userService.updateUser(1, USER_DTO);
 
-        // Проверки
         assertNotNull(updatedUser);
         assertEquals(USER.getId(), updatedUser.getId());
         assertEquals(USER.getName(), updatedUser.getName());
-        // Добавьте другие проверки, если необходимо
     }
 
     @Test
     public void deleteUserTest()  {
-        // Mock the behavior of the repository's deleteById method
         doNothing().when(userRepository).deleteById(5);
-        // Call the service method to delete the User
         userService.deleteUser(5);
-        // Verify that the delete method was called with the correct ID
         verify(userRepository, times(1)).deleteById(5);
+    }
+
+    private void securityConfiguration() {
+        User testUser = USER;
+        UserDetails userDetails = new UserDetailsImpl(testUser); // Создаем UserDetailsImpl для тестового пользователя
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication); // Устанавливаем аутентификацию для текущего теста
+
     }
 }

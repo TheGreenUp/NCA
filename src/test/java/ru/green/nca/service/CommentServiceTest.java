@@ -9,9 +9,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import ru.green.nca.dto.CommentDto;
+import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.Comment;
+import ru.green.nca.entity.User;
 import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.NewsRepository;
+import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.impl.CommentServiceImpl;
 
 import java.util.List;
@@ -32,62 +40,73 @@ public class CommentServiceTest {
     @Mock
     private NewsRepository newsRepository;
     Comment COMMENT = new Comment(1, "Test comment", null, null, 1, 1);
+    CommentDto COMMENT_DTO = new CommentDto(1, 1, "Test comment",
+            null, null, null, null);
+    User USER = new User(1, "TheGreenUp", "12345678", "Даниил",
+            "Гринь", "Сергеевич", null, null, 1);
 
     @Test
     public void getByIdTest() {
         when(commentRepository.findById(eq(5))).thenReturn(Optional.of(COMMENT));
         Comment commentById = this.commentService.getCommentById(5);
-        assertNotNull(commentById); // Проверка, что полученный объект не null
-        assertEquals(COMMENT.getId(), commentById.getId()); // Проверка, что id совпадает
-        assertEquals(COMMENT.getText(), commentById.getText()); // Проверка, что title совпадает
+        assertNotNull(commentById);
+        assertEquals(COMMENT.getId(), commentById.getId());
+        assertEquals(COMMENT.getText(), commentById.getText());
     }
 
     @Test
     public void getAllCommentTest() {
-        Pageable pageable = PageRequest.of(0, 10); // Создаем объект Pageable для пагинации
-        Page<Comment> CommentPage = new PageImpl<>(List.of(COMMENT)); // Создаем объект Page с данными
-        when(commentRepository.findAll(pageable)).thenReturn(CommentPage); // Моделируем поведение репозитория
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Comment> CommentPage = new PageImpl<>(List.of(COMMENT));
+        when(commentRepository.findAll(pageable)).thenReturn(CommentPage);
 
         List<Comment> Comment = this.commentService.getComments(0, 10);
 
-        assertNotNull(Comment); // Проверка, что полученный объект не null
-        assertEquals(1, Comment.size()); // Проверка, что список содержит 1 элемент
-        assertEquals(COMMENT, Comment.get(0)); // Проверка, что элемент соответствует ожидаемому
+        assertNotNull(Comment);
+        assertEquals(1, Comment.size());
+        assertEquals(COMMENT, Comment.get(0));
     }
 
     @Test
     public void createCommentTest() {
+        securityConfiguration();
         when(newsRepository.existsById(1)).thenReturn(true);
         when(commentRepository.save(eq(COMMENT))).thenReturn(COMMENT);
-        Comment Comment = this.commentService.createComment(COMMENT);
-        assertNotNull(Comment); // Проверка, что полученный объект не null
-        assertEquals(COMMENT.getId(), Comment.getId()); // Проверка, что id совпадает
-        assertEquals(COMMENT.getText(), Comment.getText()); // Проверка, что title совпадает
+        Comment Comment = this.commentService.createComment(COMMENT_DTO);
+        assertNotNull(Comment);
+        assertEquals(COMMENT.getId(), Comment.getId());
+        assertEquals(COMMENT.getText(), Comment.getText());
     }
 
     @Test
     public void updateCommentTests() {
-        // Подготовьте мок repository
+        securityConfiguration();
         when(commentRepository.findById(1)).thenReturn(Optional.ofNullable(COMMENT)); // Симулируем наличие новости с ID 1
         when(commentRepository.save(COMMENT)).thenReturn(COMMENT);
 
-        // Вызываем метод обновления
-        Comment updatedComment = commentService.updateComment(1, COMMENT);
+        Comment updatedComment = commentService.updateComment(1, COMMENT_DTO);
 
-        // Проверки
         assertNotNull(updatedComment);
         assertEquals(COMMENT.getId(), updatedComment.getId());
         assertEquals(COMMENT.getText(), updatedComment.getText());
-        // Добавьте другие проверки, если необходимо
     }
 
     @Test
     public void deleteCommentTest() {
-        // Mock the behavior of the repository's deleteById method
+        securityConfiguration();
+        when(commentRepository.findById(5)).thenReturn(Optional.ofNullable(COMMENT));
         doNothing().when(commentRepository).deleteById(5);
-        // Call the service method to delete the Comment
+
         commentService.deleteComment(5);
-        // Verify that the delete method was called with the correct ID
         verify(commentRepository, times(1)).deleteById(5);
+
+    }
+
+    private void securityConfiguration() {
+        User testUser = USER;
+        UserDetails userDetails = new UserDetailsImpl(testUser); // Создаем UserDetailsImpl для тестового пользователя
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication); // Устанавливаем аутентификацию для текущего теста
     }
 }

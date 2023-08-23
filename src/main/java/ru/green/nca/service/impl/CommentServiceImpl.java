@@ -8,16 +8,24 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import ru.green.nca.dto.CommentDto;
 import ru.green.nca.entity.Comment;
+import ru.green.nca.entity.User;
+import ru.green.nca.exceptions.ForbiddenException;
 import ru.green.nca.exceptions.NoDataFoundException;
 import ru.green.nca.exceptions.ResourceNotFoundException;
 import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.NewsRepository;
+import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.CommentService;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -29,10 +37,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<Comment> getComments(int page, int size) {
-        Pageable pageable = PageRequest.of(page, Math.min(size, 100)); //устанавливаем максимальное ограничение страницы в 100 записей
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
+        //TODO с этим тоже разобраться
         Page<Comment> commentPage = commentRepository.findAll(pageable);
         if (commentPage.isEmpty()) {
-            log.warn("No news was found");
+            log.warn("No comments were found");
             throw new NoDataFoundException("No comments were found");
         }
         return commentPage.getContent();
@@ -46,8 +55,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment createComment(Comment comment) {
-        if(!newsRepository.existsById(comment.getIdNews()))
+    public Comment createComment(CommentDto commentDto) {
+        Comment comment = convertToComment(commentDto);
+        if (!newsRepository.existsById(comment.getIdNews()))
             throw new ResourceNotFoundException("News with id = " + comment.getIdNews() + " was not found");
         commentRepository.save(comment);
         log.debug("Create comments request with next params: " + comment);
@@ -56,15 +66,24 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(int commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment with id = " + commentId + " was not found"));
+        if (getCurrentUser().getRoleId() != 1) {
+            if (!Objects.equals(comment.getInsertedById(), getCurrentUser().getId()))
+                throw new ForbiddenException("Access denied. You do not have permission to modify this comment.");
+        }
         commentRepository.deleteById(commentId);
-        log.debug("Comment with id = " + commentId + " was successfully deleted (maybe).");
+        log.debug("Comment with id = " + commentId + " was successfully deleted.");
     }
 
     @Override
-    public Comment updateComment(int commentId, Comment updatedComment) {
+    public Comment updateComment(int commentId, CommentDto updatedCommentDto) {
+        Comment updatedComment = convertToComment(updatedCommentDto);
         Comment existingComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment with id = " + commentId + " was not found"));
         BeanUtils.copyProperties(updatedComment, existingComment, getNullPropertyNames(updatedComment));
+        if (!Objects.equals(existingComment.getInsertedById(), getCurrentUser().getId()))
+            throw new ForbiddenException("Access denied. You do not have permission to modify this comment.");
         log.debug("Update comments with id = " + commentId + " with incoming params: " + updatedComment);
         return commentRepository.save(existingComment);
     }
@@ -87,5 +106,23 @@ public class CommentServiceImpl implements CommentService {
         String[] result = new String[emptyNames.size()];
         return emptyNames.toArray(result);
     }
+
+    private Comment convertToComment(CommentDto commentDto) {
+        Comment comment = new Comment();
+        comment.setId(commentDto.getId());
+        comment.setText(commentDto.getText());
+        comment.setIdNews(commentDto.getIdNews());
+        comment.setInsertedById(getCurrentUser().getId());
+        return comment;
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetailsImpl userDetails1 = (UserDetailsImpl) userDetails;
+        return userDetails1.getUser();
+    }
+
+
 
 }

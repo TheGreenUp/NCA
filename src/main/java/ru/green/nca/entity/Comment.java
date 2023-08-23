@@ -3,9 +3,6 @@ package ru.green.nca.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -13,6 +10,7 @@ import java.time.Instant;
 @Entity
 
 @Slf4j
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,10 +21,8 @@ public class Comment {
     @Column(name = "text", length = 300)
     private String text;
     @Column(name = "creation_date")
-    @CreatedDate
     private Instant creationDate;
     @Column(name = "last_edit_date")
-    @LastModifiedDate
     private Instant lastEditDate;
     @Column(name = "inserted_by_id")
     private Integer insertedById;

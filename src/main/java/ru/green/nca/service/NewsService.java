@@ -1,5 +1,6 @@
 package ru.green.nca.service;
 
+import ru.green.nca.dto.NewsDto;
 import ru.green.nca.entity.News;
 import ru.green.nca.dto.NewsWithCommentsDto;
 
@@ -10,11 +11,11 @@ public interface NewsService {
 
     List<News> getNews(int page, int size);
 
-    News createNews(News news);
+    News createNews(NewsDto newsDto);
 
     NewsWithCommentsDto viewNewsWithComments(int newsId, int commentPage, int commentSize);
 
-    News updateNews(int newsId, News updatedNews);
+    News updateNews(int newsId, NewsDto updatedNewsDto);
 
     void deleteNews(int newsId);
 

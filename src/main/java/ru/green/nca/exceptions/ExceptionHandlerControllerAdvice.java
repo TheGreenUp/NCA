@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class GlobalException {
+public class ExceptionHandlerControllerAdvice {
     @ExceptionHandler
     public ResponseEntity<ErrorObject> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ErrorObject errorObject = new ErrorObject();
@@ -30,5 +30,13 @@ public class GlobalException {
         errorObject.setMessage(ex.getMessage());
         errorObject.setTimestamp(System.currentTimeMillis());
         return new ResponseEntity<>(errorObject, HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler
+    public ResponseEntity<ErrorObject> handleForbiddenException(ForbiddenException ex) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.FORBIDDEN.value());
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setTimestamp(System.currentTimeMillis());
+        return new ResponseEntity<>(errorObject, HttpStatus.FORBIDDEN);
     }
 }
