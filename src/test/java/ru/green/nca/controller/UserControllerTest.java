@@ -3,12 +3,14 @@ package ru.green.nca.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
+import ru.green.nca.security.JWTUtil;
 import ru.green.nca.service.UserService;
 
 import java.util.List;
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
 
     @Autowired
@@ -29,6 +32,8 @@ public class UserControllerTest {
 
     @MockBean
     private UserService userService;
+    @MockBean
+    private JWTUtil jwtUtil;
     User USER = new User(1, "TheGreenUp", "12345678","Даниил",
             "Гринь","Сергеевич",null,null,1);
     UserDto USER_DTO = new UserDto(1, "TheGreenUp", "12345678","Даниил",

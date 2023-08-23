@@ -29,6 +29,11 @@ public class User {
     @Column(name = "id_role")
     private int roleId;
 
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     @PrePersist
     public void prePersist() {
         creationDate = Instant.now();

@@ -3,6 +3,7 @@ package ru.green.nca.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import ru.green.nca.dto.NewsDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.News;
 import ru.green.nca.dto.NewsWithCommentsDto;
+import ru.green.nca.security.JWTUtil;
 import ru.green.nca.service.NewsService;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(NewsController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class NewsControllerTest {
 
     @Autowired
@@ -31,6 +34,9 @@ public class NewsControllerTest {
 
     @MockBean
     private NewsService newsService;
+
+    @MockBean
+    private JWTUtil jwtUtil;
     News NEWS_1 = new News(1, "1984", "Orwell", null, null, 1, 1);
     NewsDto NEWS_DTO = new NewsDto(1, "1984", "Orwell", null,
             null, null,null, null,null);

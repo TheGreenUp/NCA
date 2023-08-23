@@ -1,15 +1,22 @@
 package ru.green.nca.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.green.nca.config.JWTFilter;
 import ru.green.nca.dto.CommentDto;
 import ru.green.nca.entity.Comment;
+import ru.green.nca.security.JWTUtil;
 import ru.green.nca.service.CommentService;
 
 import java.util.List;
@@ -21,21 +28,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(CommentController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class CommentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private CommentService commentService;
-    Comment COMMENT = new Comment(1,"Test comment", null,null,1,1);
-    CommentDto COMMENT_DTO = new CommentDto(1,1,"Test comment",
-            null,null, null,null);
+    @MockBean
+    private JWTUtil jwtUtil;
+
+    Comment COMMENT = new Comment(1, "Test comment", null, null, 1, 1);
+    CommentDto COMMENT_DTO = new CommentDto(1, 1, "Test comment",
+            null, null, null, null);
+
     @Test
     public void getAllCommentTest() throws Exception {
+        Authentication authentication = Mockito.mock(Authentication.class);
         when(commentService.getComments(eq(0), eq(10))).thenReturn(List.of(COMMENT));
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
         //сверху мы описываем поведение, что будет, если передадим 0 и 10 в качестве параметров
         //а снизу мы вызываем с этими параметрами, на что получаем результат из thenReturn()
         this.mockMvc.perform(get("/api/comments?page=0&size=10"))
@@ -80,6 +94,7 @@ public class CommentControllerTest {
         System.out.println(COMMENT);
         verify(commentService).updateComment(eq(1), eq(COMMENT));
     }
+
     // Метод для преобразования объекта в JSON строку
     private static String asJsonString(final Object obj) {
         try {

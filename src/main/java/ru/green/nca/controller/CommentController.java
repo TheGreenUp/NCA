@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.green.nca.dto.CommentDto;
 import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.User;
+import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.CommentService;
 
 import java.util.List;
@@ -23,6 +27,10 @@ public class CommentController {
     public List<Comment> getComments(@RequestParam(defaultValue = "0") int page,
                                      @RequestParam(defaultValue = "10") int size) {
         log.info("Entering 'get all comments' endpoint");
+
+       // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      // UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
         return commentService.getComments(page,size);
     }
 

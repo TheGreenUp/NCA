@@ -1,15 +1,16 @@
-  spring:
-      datasource:
-        username: postgres
-        url: jdbc:postgresql://localhost:5432/postgres
-        password: postgres
-      jpa:
-        properties:
-          hibernate:
-            dialect: org.hibernate.dialect.PostgreSQLDialect
-            default_schema: NCA
-            ddl-auto: update
-            jdbc:
-              lob:
-                non_contextual_creation: 'true'
-        hibernate:
+spring:
+  datasource:
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        ddl-auto: update
+        default_schema: NCA
+        jdbc:
+          lob:
+            non_contextual_creation: 'true'
+    hibernate: 'null'
+jwt_secret: pancakes

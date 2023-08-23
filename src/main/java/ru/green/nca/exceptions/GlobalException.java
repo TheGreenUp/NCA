@@ -23,4 +23,12 @@ public class GlobalException {
         errorObject.setTimestamp(System.currentTimeMillis());
         return new ResponseEntity<>(errorObject, HttpStatus.OK);
     }
+    @ExceptionHandler
+    public ResponseEntity<ErrorObject> handleConflictException(ConflictException ex) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.CONFLICT.value());
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setTimestamp(System.currentTimeMillis());
+        return new ResponseEntity<>(errorObject, HttpStatus.CONFLICT);
+    }
 }
