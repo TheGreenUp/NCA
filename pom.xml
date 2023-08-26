@@ -58,6 +58,7 @@
 			<version>5.4.0</version>
 				<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -70,6 +71,7 @@
 			<artifactId>maven-javadoc-plugin</artifactId>
 			<version>3.5.0</version>
 		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

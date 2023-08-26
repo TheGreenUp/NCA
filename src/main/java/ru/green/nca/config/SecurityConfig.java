@@ -5,21 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import ru.green.nca.service.impl.UserDetailsServiceImpl;
-
-import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -39,13 +33,10 @@ public class SecurityConfig{
                         authorizeRequests
                                 .requestMatchers(HttpMethod.GET, "/api/news/**", "/api/comments/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-
-                                .requestMatchers(HttpMethod.POST, "/api/comments.**").hasRole("SUBSCRIBER")
-                                .requestMatchers(HttpMethod.PUT, "/api/comments.**").hasRole("SUBSCRIBER")
-
-                                .requestMatchers(HttpMethod.POST,"/api/news/, /api/comments.**").hasRole("JOURNALIST")
-                                .requestMatchers(HttpMethod.POST,"/api/news/, /api/comments.**").hasRole("JOURNALIST")
-
+                                .requestMatchers(HttpMethod.POST, "/api/news", "/api/comments").hasAuthority("ROLE_JOURNALIST")
+                                .requestMatchers(HttpMethod.PUT, "/api/news/**", "/api/comments/**").hasAuthority("ROLE_JOURNALIST")
+                                .requestMatchers(HttpMethod.POST, "/api/comments/**").hasAuthority("ROLE_SUBSCRIBER")
+                                .requestMatchers(HttpMethod.PUT, "/api/comments/**").hasAuthority("ROLE_SUBSCRIBER")
                                 .anyRequest().hasRole("ADMIN")
                 )
                 .formLogin(withDefaults())

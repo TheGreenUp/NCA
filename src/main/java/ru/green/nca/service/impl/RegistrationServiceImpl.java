@@ -17,4 +17,9 @@ public class RegistrationServiceImpl {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
+
+    //TODO некрасиво, надо бы как-нибудь лучше
+    public boolean checkExistence(User user) {
+        return userRepository.findByUsername(user.getUsername()).isPresent();
+    }
 }

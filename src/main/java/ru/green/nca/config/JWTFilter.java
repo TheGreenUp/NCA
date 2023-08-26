@@ -24,29 +24,41 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // Получение JWT из заголовка "Authorization"
         String authHeader = request.getHeader("Authorization");
+
+        // Проверка наличия и формата токена
         if (authHeader != null && !authHeader.isBlank() && authHeader.startsWith("Bearer ")) {
+            // Извлечение токена без "Bearer "
             String token = authHeader.substring(7);
 
+            // Проверка на пустой токен
             if (token.isBlank()) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT token in bearer header");
             } else {
                 try {
-
-
+                    // Валидация токена и получение имени пользователя
                     String username = jwtUtil.validateTokenAndRetrieveClaim(token);
+
+                    // Загрузка деталей пользователя
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
+                    // Создание аутентификационного токена на основе данных пользователя
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+
+                    // Установка аутентификации, если она еще не установлена
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     }
                 } catch (JWTVerificationException ex) {
+                    // Ошибка при невалидном токене
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JWT token");
                 }
             }
         }
+
+        // Продолжение цепочки фильтров
         filterChain.doFilter(request, response);
     }
 }

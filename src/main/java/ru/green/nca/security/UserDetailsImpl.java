@@ -18,6 +18,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        System.out.println("Logged user info: " + user);
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         switch (user.getRoleId()) {
             case 1:
@@ -30,6 +31,7 @@ public class UserDetailsImpl implements UserDetails {
                 authorities.add(new SimpleGrantedAuthority("ROLE_SUBSCRIBER"));
                 break;
         }
+        System.out.println("Granted authority - " + authorities);
         return authorities;
     }
 
@@ -37,7 +39,6 @@ public class UserDetailsImpl implements UserDetails {
     public String getPassword() {
         return this.user.getPassword();
     }
-
     @Override
     public String getUsername() {
         return this.user.getUsername();
@@ -62,7 +63,6 @@ public class UserDetailsImpl implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    //Нужно, чтобы получать данные аутентифицированного пользователя
     public User getUser(){
         return this.user;
     }
