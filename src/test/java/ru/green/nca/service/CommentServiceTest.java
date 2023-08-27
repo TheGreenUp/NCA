@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -14,9 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.green.nca.dto.CommentDto;
-import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.User;
+import ru.green.nca.enums.UserRole;
 import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.NewsRepository;
 import ru.green.nca.security.UserDetailsImpl;
@@ -39,16 +40,19 @@ public class CommentServiceTest {
     private CommentRepository commentRepository;
     @Mock
     private NewsRepository newsRepository;
+    @Mock
+    private ModelMapper modelMapper;
     Comment COMMENT = new Comment(1, "Test comment", null, null, 1, 1);
     CommentDto COMMENT_DTO = new CommentDto(1, 1, "Test comment",
             null, null, null, null);
     User USER = new User(1, "TheGreenUp", "12345678", "Даниил",
-            "Гринь", "Сергеевич", null, null, 1);
+            "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
 
     @Test
     public void getByIdTest() {
         when(commentRepository.findById(eq(5))).thenReturn(Optional.of(COMMENT));
         Comment commentById = this.commentService.getCommentById(5);
+
         assertNotNull(commentById);
         assertEquals(COMMENT.getId(), commentById.getId());
         assertEquals(COMMENT.getText(), commentById.getText());
@@ -60,11 +64,11 @@ public class CommentServiceTest {
         Page<Comment> CommentPage = new PageImpl<>(List.of(COMMENT));
         when(commentRepository.findAll(pageable)).thenReturn(CommentPage);
 
-        List<Comment> Comment = this.commentService.getComments(0, 10);
+        List<Comment> comments = this.commentService.getComments(0, 10);
 
-        assertNotNull(Comment);
-        assertEquals(1, Comment.size());
-        assertEquals(COMMENT, Comment.get(0));
+        assertNotNull(comments);
+        assertEquals(1, comments.size());
+        assertEquals(COMMENT, comments.get(0));
     }
 
     @Test
@@ -72,10 +76,10 @@ public class CommentServiceTest {
         securityConfiguration();
         when(newsRepository.existsById(1)).thenReturn(true);
         when(commentRepository.save(eq(COMMENT))).thenReturn(COMMENT);
-        Comment Comment = this.commentService.createComment(COMMENT_DTO);
-        assertNotNull(Comment);
-        assertEquals(COMMENT.getId(), Comment.getId());
-        assertEquals(COMMENT.getText(), Comment.getText());
+        Comment comment = this.commentService.createComment(COMMENT_DTO);
+        assertNotNull(comment);
+        assertEquals(COMMENT.getId(), comment.getId());
+        assertEquals(COMMENT.getText(), comment.getText());
     }
 
     @Test
@@ -84,11 +88,11 @@ public class CommentServiceTest {
         when(commentRepository.findById(1)).thenReturn(Optional.ofNullable(COMMENT)); // Симулируем наличие новости с ID 1
         when(commentRepository.save(COMMENT)).thenReturn(COMMENT);
 
-        Comment updatedComment = commentService.updateComment(1, COMMENT_DTO);
+        Comment updatedCommentDto = commentService.updateComment(1, COMMENT_DTO);
 
-        assertNotNull(updatedComment);
-        assertEquals(COMMENT.getId(), updatedComment.getId());
-        assertEquals(COMMENT.getText(), updatedComment.getText());
+        assertNotNull(updatedCommentDto);
+        assertEquals(COMMENT.getId(), updatedCommentDto.getId());
+        assertEquals(COMMENT.getText(), updatedCommentDto.getText());
     }
 
     @Test

@@ -10,8 +10,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
+import ru.green.nca.enums.UserRole;
 import ru.green.nca.security.JWTUtil;
 import ru.green.nca.service.UserService;
+import ru.green.nca.util.JsonConverter;
 
 import java.util.List;
 
@@ -34,21 +36,23 @@ public class UserControllerTest {
     private UserService userService;
     @MockBean
     private JWTUtil jwtUtil;
-    User USER = new User(1, "TheGreenUp", "12345678","Даниил",
-            "Гринь","Сергеевич",null,null,1);
-    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "12345678","Даниил",
-            "Гринь","Сергеевич",null,null,1);
+    User USER = new User(1, "TheGreenUp", "12345678", "Даниил",
+            "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
+    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "12345678", "Даниил",
+            "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
+
     @Test
     public void getAllUserTest() throws Exception {
         when(userService.getAllUsers(eq(0), eq(10))).thenReturn(List.of(USER));
         this.mockMvc.perform(get("/api/users?page=0&size=10"))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
     public void getUserByIdTest() throws Exception {
-        when(userService.getUserById(eq(3))).thenReturn(USER);
+        when(userService.getUserById(eq(3))).thenReturn(USER_DTO);
         this.mockMvc.perform(get("/api/users/3"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -58,7 +62,7 @@ public class UserControllerTest {
     @Test
     public void createUserTest() throws Exception {
         when(userService.createUser(USER_DTO)).thenReturn(USER);
-        String UserJson = asJsonString(USER);
+        String UserJson = JsonConverter.asJsonString(USER);
         this.mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(UserJson))
@@ -79,18 +83,10 @@ public class UserControllerTest {
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(USER_DTO)))
+                        .content(JsonConverter.asJsonString(USER_DTO)))
                 .andExpect(status().isOk());
 
+
         verify(userService).updateUser(eq(1), eq(USER_DTO));
-    }
-    // Метод для преобразования объекта в JSON строку
-    private static String asJsonString(final Object obj) {
-        try {
-            final ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

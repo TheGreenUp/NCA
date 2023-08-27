@@ -3,10 +3,14 @@ package ru.green.nca.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.green.nca.dto.AuthenticationDto;
 import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
@@ -21,13 +25,20 @@ import java.util.Map;
 @RequestMapping("/auth")
 @AllArgsConstructor
 @Slf4j
+@Profile(value = "default")
 public class AuthController {
     private final RegistrationServiceImpl registrationService;
     private final ModelMapper modelMapper;
     private final JWTUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
-
+    /**
+     * Регистрирует нового пользователя.
+     *
+     * @param userDto DTO с информацией о пользователе.
+     * @return Map с JWT-токеном и рандомно сгенерированным паролем.
+     * @throws ConflictException если пользователь с таким именем пользователя уже существует.
+     */
     @PostMapping("/registration")
     public Map<String, String> performRegistration(@RequestBody UserDto userDto) {
         log.info("Entering performReg endpoint");
@@ -44,6 +55,13 @@ public class AuthController {
         return Map.of("jwt-token: ", token, "password: ", randomPassword);
     }
 
+    /**
+     * Выполняет вход пользователя.
+     *
+     * @param authenticationDto DTO с информацией для аутентификации.
+     * @return Map с JWT-токеном в случае успешной аутентификации или ошибкой в случае неверных учетных данных.
+     */
+
     @PostMapping("/login")
     public Map<String, String> performLogin(@RequestBody AuthenticationDto authenticationDto) {
         // Создаем аутентификационный токен на основе данных пользователя
@@ -58,7 +76,12 @@ public class AuthController {
         String token = jwtUtil.generateToken(authenticationDto.getUsername());
         return Map.of("jwt-token: ", token);
     }
-
+    /**
+     * Преобразует UserDto в сущность User.
+     *
+     * @param userDto DTO с информацией о пользователе.
+     * @return Объект User, полученный в результате преобразования.
+     */
     public User convertToUser(UserDto userDto) {
         return this.modelMapper.map(userDto, User.class);
     }

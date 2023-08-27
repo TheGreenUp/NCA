@@ -1,23 +1,17 @@
 package ru.green.nca.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.green.nca.config.JWTFilter;
 import ru.green.nca.dto.CommentDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.security.JWTUtil;
 import ru.green.nca.service.CommentService;
+import ru.green.nca.util.JsonConverter;
 
 import java.util.List;
 
@@ -28,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebMvcTest(CommentController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class CommentControllerTest {
@@ -45,13 +40,14 @@ public class CommentControllerTest {
 
     @Test
     public void getAllCommentTest() throws Exception {
-        when(commentService.getComments(eq(0),eq(10))).thenReturn(List.of(COMMENT));
+        when(commentService.getComments(eq(0), eq(10))).thenReturn(List.of(COMMENT));
         //сверху мы описываем поведение, что будет, если передадим 0 и 10 в качестве параметров
         //а снизу мы вызываем с этими параметрами, на что получаем результат из thenReturn()
         this.mockMvc.perform(get("/api/comments?page=0&size=10"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string("[" + JsonConverter.asJsonString(COMMENT) + "]"));
     }
 
     @Test
@@ -60,7 +56,8 @@ public class CommentControllerTest {
         this.mockMvc.perform(get("/api/comments/3"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(JsonConverter.asJsonString(COMMENT)));
     }
 
     @Test
@@ -68,10 +65,11 @@ public class CommentControllerTest {
         when(commentService.createComment(COMMENT_DTO)).thenReturn(COMMENT);
         this.mockMvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(COMMENT_DTO)))
+                        .content(JsonConverter.asJsonString(COMMENT_DTO)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(JsonConverter.asJsonString(COMMENT)));
     }
 
     @Test
@@ -86,19 +84,11 @@ public class CommentControllerTest {
         when(commentService.updateComment(eq(1), eq(COMMENT_DTO))).thenReturn(COMMENT);
         mockMvc.perform(put("/api/comments/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(COMMENT_DTO)))
-                .andExpect(status().isOk());
-        System.out.println(COMMENT);
+                        .content(JsonConverter.asJsonString(COMMENT_DTO)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(JsonConverter.asJsonString(COMMENT)));
         verify(commentService).updateComment(eq(1), eq(COMMENT_DTO));
-    }
-
-    // Метод для преобразования объекта в JSON строку
-    private static String asJsonString(final Object obj) {
-        try {
-            final ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

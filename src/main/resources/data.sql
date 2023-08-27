@@ -283,5 +283,9 @@ VALUES
        ('Надеюсь, что мы все будем помнить Болци как символ жизнерадостности и энергии, которую он передавал всем вокруг.', 10, 20,null,null);
 
 ----------------------------------
-INSERT INTO users (username, password, name, surname, parent_name, creation_date, last_edit_date, role_id)
-VALUES ('john_doe', 'password123', 'John', 'Doe', 'Mary', '2023-08-18T12:34:56Z', '2023-08-18T12:34:56Z',null,null,1);
+--INSERT INTO users (username, password, name, surname, parent_name, creation_date, last_edit_date,id_role)
+--VALUES ('john_doe', 'password123', 'John', 'Doe', 'Mary', '2023-08-18T12:34:56Z', '2023-08-18T12:34:56Z',null,null,1);
+
+INSERT INTO users (username, password, name, surname, parent_name, id_role)
+VALUES ('username', 'password', 'John', 'Doe', 'Parent Doe', 1);
+

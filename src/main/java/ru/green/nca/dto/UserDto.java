@@ -1,10 +1,13 @@
 package ru.green.nca.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.green.nca.enums.UserRole;
 
 import java.time.Instant;
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
     private int id;
     private String username;
@@ -14,6 +17,6 @@ public class UserDto {
     private String parentName;
     private Instant creationDate;
     private Instant lastEditDate;
-    private int roleId;
+    private UserRole role;
 
 }

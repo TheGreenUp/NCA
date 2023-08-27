@@ -15,3 +15,8 @@ spring:
   sql:
     init:
       mode: always
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+#Придется немного побегать по коду и закоментить две строчки кода. Пока не придумал как сделать лучше
+jwt_secret: pancakes
+maxPageSize: 100

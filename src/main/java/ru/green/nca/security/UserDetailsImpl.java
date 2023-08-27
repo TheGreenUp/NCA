@@ -1,5 +1,6 @@
 package ru.green.nca.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,7 +9,7 @@ import ru.green.nca.entity.User;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
+@Slf4j
 public class UserDetailsImpl implements UserDetails {
     private final User user;
 
@@ -18,20 +19,14 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        System.out.println("Logged user info: " + user);
+        log.info("Logged user info: " + user);
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        switch (user.getRoleId()) {
-            case 1:
-                authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                break;
-            case 2:
-                authorities.add(new SimpleGrantedAuthority("ROLE_JOURNALIST"));
-                break;
-            default:
-                authorities.add(new SimpleGrantedAuthority("ROLE_SUBSCRIBER"));
-                break;
+        switch (user.getRole()) {
+            case ADMIN -> authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            case JOURNALIST -> authorities.add(new SimpleGrantedAuthority("ROLE_JOURNALIST"));
+            default -> authorities.add(new SimpleGrantedAuthority("ROLE_SUBSCRIBER"));
         }
-        System.out.println("Granted authority - " + authorities);
+        log.info("Granted authority - " + authorities + " for " + user.getUsername());
         return authorities;
     }
 

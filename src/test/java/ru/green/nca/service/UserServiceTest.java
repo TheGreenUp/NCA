@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
+import ru.green.nca.enums.UserRole;
 import ru.green.nca.repository.UserRepository;
 import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.impl.UserServiceImpl;
@@ -35,23 +38,27 @@ public class UserServiceTest {
     private UserServiceImpl userService;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ModelMapper modelMapper;
 
-    User USER = new User(1, "TheGreenUp", "encodedPassword","Даниил",
-            "Гринь","Сергеевич",null,null,1);
-    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "encodedPassword","Даниил",
-            "Гринь","Сергеевич",null,null,1);
+    User USER = new User(1, "TheGreenUp", "encodedPassword", "Даниил",
+            "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
+    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "encodedPassword", "Даниил",
+            "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
 
     @Test
-    public void getByIdTest()  {
-        when(userRepository.findById(eq(5))).thenReturn(Optional.of(USER));
-        User userById = this.userService.getUserById(5);
+    public void getByIdTest() {
+        when(userRepository.findById(any())).thenReturn(Optional.of(USER));
+        when(modelMapper.map(any(), any())).thenReturn(USER_DTO);
+
+        UserDto userById = userService.getUserById(5);
         assertNotNull(userById);
         assertEquals(USER.getId(), userById.getId());
         assertEquals(USER.getName(), userById.getName());
     }
 
     @Test
-    public void getAllUserTest()  {
+    public void getAllUserTest() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<User> UserPage = new PageImpl<>(List.of(USER));
         when(userRepository.findAll(pageable)).thenReturn(UserPage);
@@ -69,7 +76,7 @@ public class UserServiceTest {
         PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
         when(passwordEncoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 
-        UserService userService = new UserServiceImpl(userRepository, passwordEncoderMock);
+        UserService userService = new UserServiceImpl(userRepository, passwordEncoderMock, modelMapper);
 
         when(userRepository.save(eq(USER))).thenReturn(USER);
 
@@ -82,13 +89,13 @@ public class UserServiceTest {
 
 
     @Test
-    public void updateUserTest()  {
+    public void updateUserTest() {
         securityConfiguration();
 
         PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
         when(passwordEncoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 
-        UserServiceImpl userService = new UserServiceImpl(userRepository, passwordEncoderMock);
+        UserServiceImpl userService = new UserServiceImpl(userRepository, passwordEncoderMock, modelMapper);
 
 
         when(userRepository.findById(1)).thenReturn(Optional.of(USER));
@@ -102,7 +109,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void deleteUserTest()  {
+    public void deleteUserTest() {
         doNothing().when(userRepository).deleteById(5);
         userService.deleteUser(5);
         verify(userRepository, times(1)).deleteById(5);

@@ -15,5 +15,4 @@ spring:
     hibernate: 'null'
 
 jwt_secret: pancakes
-
 maxPageSize: 100

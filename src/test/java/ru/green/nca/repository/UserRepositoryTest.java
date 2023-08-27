@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import ru.green.nca.entity.User;
+import ru.green.nca.enums.UserRole;
 
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public class UserRepositoryTest {
         user.setName("Игорёк");
         user.setSurname("Мегамозг");
         user.setParentName("Крушительвович");
-        user.setRoleId(2);
+        user.setRole(UserRole.JOURNALIST);
         return user;
     }
 }

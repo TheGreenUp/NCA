@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ru.green.nca.enums.UserRole;
 
 import java.time.Instant;
 
@@ -32,9 +33,7 @@ public class User {
     @UpdateTimestamp
     private Instant lastEditDate;
     @Column(name = "id_role")
-    private int roleId;
-
-    //TODO поставить enum вместо int
+    private UserRole role;
     public User(String username, String password) {
         this.username = username;
         this.password = password;

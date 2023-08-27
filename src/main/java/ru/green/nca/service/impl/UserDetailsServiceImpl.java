@@ -10,12 +10,20 @@ import ru.green.nca.repository.UserRepository;
 import ru.green.nca.security.UserDetailsImpl;
 
 import java.util.Optional;
-
+/**
+ * Реализация интерфейса UserDetailsService для аутентификации пользователей.
+ */
 @AllArgsConstructor
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
-
+    /**
+     * Загрузка данных пользователя по имени пользователя для аутентификации.
+     *
+     * @param username имя пользователя
+     * @return объект UserDetails, представляющий данные пользователя
+     * @throws UsernameNotFoundException если пользователь с указанным именем не найден
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
