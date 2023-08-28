@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,6 @@ import java.util.Map;
 @RequestMapping("/auth")
 @AllArgsConstructor
 @Slf4j
-@Profile(value = "default")
 public class AuthController {
     private final RegistrationServiceImpl registrationService;
     private final ModelMapper modelMapper;
@@ -50,9 +50,9 @@ public class AuthController {
         String randomPassword = RandomPasswordGenerator.generateRandomPassword();
         user.setPassword(randomPassword);
         registrationService.register(user);
-        log.debug("Username: " + user.getUsername()  + ", password = " + randomPassword + " was successfully registered");
+        log.debug("username" + user.getUsername() + ", password = " + randomPassword + " was successfully registered");
         String token = jwtUtil.generateToken(user.getUsername());
-        return Map.of("jwt-token: ", token, "password: ", randomPassword);
+        return Map.of("jwt-token", token, "password: ", randomPassword);
     }
 
     /**
@@ -67,15 +67,16 @@ public class AuthController {
         // Создаем аутентификационный токен на основе данных пользователя
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(authenticationDto.getUsername(),
-                        authenticationDto.getPassword());
+                         authenticationDto.getPassword());
         try {
             authenticationManager.authenticate(authenticationToken);
         } catch (BadCredentialsException ex) {
-            return Map.of("Error: ", "bad credentials");
+            return Map.of("Error", "bad credentials");
         }
         String token = jwtUtil.generateToken(authenticationDto.getUsername());
-        return Map.of("jwt-token: ", token);
+        return Map.of("jwt-token", token);
     }
+
     /**
      * Преобразует UserDto в сущность User.
      *

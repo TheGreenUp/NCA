@@ -1,7 +1,10 @@
 package ru.green.nca.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -38,6 +41,7 @@ public class News {
     private Integer insertedById;
     @Column(name = "updated_by_id")
     private Integer updatedById;
+
     @PrePersist
     public void prePersist() {
         creationDate = Instant.now();

@@ -1,14 +1,11 @@
 package ru.green.nca.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 public class JsonConverter {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private JsonConverter(){
+    private JsonConverter() {
 
     }
 

@@ -2,25 +2,24 @@ package ru.green.nca.service.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.green.nca.dto.UserDto;
+import ru.green.nca.entity.Comment;
 import ru.green.nca.entity.User;
 import ru.green.nca.exceptions.ResourceNotFoundException;
+import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.UserRepository;
 import ru.green.nca.security.RandomPasswordGenerator;
-import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.UserService;
+import ru.green.nca.util.CurrentUserProvider;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,8 +33,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
+    private CommentRepository commentRepository;
     private PasswordEncoder passwordEncoder;
-    private ModelMapper modelMapper;
 
     /**
      * Получение списка всех пользователей с учетом пагинации.
@@ -45,14 +44,17 @@ public class UserServiceImpl implements UserService {
      * @return список пользователей на указанной странице
      */
     @Override
-    public List<User> getAllUsers(int page, int size) {
+    public List<UserDto> getAllUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
         Page<User> userPage = userRepository.findAll(pageable);
         if (userPage.isEmpty()) {
             log.warn("No users were found");
         }
-        return userPage.getContent();
+        return userPage.getContent().stream()
+                .map(this::convertToUserDto)
+                .toList();
     }
+
 
     /**
      * Получение информации о пользователе по его идентификатору.
@@ -63,10 +65,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDto getUserById(int userId) {
-        User foundUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " was not found"));
-        return modelMapper.map(foundUser, UserDto.class);
-
+        return convertToUserDto(userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " was not found")));
     }
 
     /**
@@ -76,8 +76,8 @@ public class UserServiceImpl implements UserService {
      * @return созданный пользователь
      */
     @Override
-    public User createUser(UserDto userDto) {
-        return userRepository.save(convertToUser(userDto));
+    public UserDto createUser(UserDto userDto) {
+        return convertToUserDto(userRepository.save(convertToUser(userDto)));
     }
 
     /**
@@ -87,9 +87,18 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(int userId) {
+        List<Comment> commentsToDelete = commentRepository.findAllByInsertedById(userId);
+        for (Comment comment : commentsToDelete) {
+            commentRepository.deleteById(comment.getId());
+        }
+        for (Comment comment : commentsToDelete) {
+            commentRepository.deleteById(comment.getId());
+        }
+
         userRepository.deleteById(userId);
-        log.debug("User with id = " + userId + " was successfully deleted (maybe).");
+        log.debug("User with id = " + userId + " was successfully deleted along with their comments.");
     }
+
 
     /**
      * Обновление информации о пользователе.
@@ -99,14 +108,14 @@ public class UserServiceImpl implements UserService {
      * @return обновленный пользователь
      * @throws ResourceNotFoundException если пользователь с указанным идентификатором не найден
      */
-    public User updateUser(int userId, UserDto updatedUserDto) {
+    public UserDto updateUser(int userId, UserDto updatedUserDto) {
         User updatedUser = convertToUser(updatedUserDto);
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id = " + userId + "  found"));
 
         // Игнорируем null значения при копировании свойств
         BeanUtils.copyProperties(updatedUser, existingUser, getNullPropertyNames(updatedUser));
-        return userRepository.save(existingUser);
+        return convertToUserDto(userRepository.save(existingUser));
     }
 
     /**
@@ -150,22 +159,22 @@ public class UserServiceImpl implements UserService {
         user.setSurname(userDto.getSurname());
         user.setParentName(userDto.getParentName());
         user.setRole(userDto.getRole());
-        log.info("Request from userId = " + getCurrentUser().getId() + " to create/update new user." +
+        log.info("Request from userId = " + CurrentUserProvider.getInstance().getCurrentUser().getId() + " to create/update new user." +
                 " New user data:\nUsername: " + user.getUsername() + "\nPassword: " + randomPassword);
         return user;
     }
 
-    /**
-     * Получение текущего пользователя.
-     *
-     * @return объект пользователя, представляющий текущего аутентифицированного пользователя
-     */
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        UserDetailsImpl userDetails1 = (UserDetailsImpl) userDetails;
-        return userDetails1.getUser();
+    private UserDto convertToUserDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setUsername(user.getUsername());
+        userDto.setName(user.getName());
+        userDto.setSurname(user.getSurname());
+        userDto.setParentName(user.getParentName());
+        userDto.setCreationDate(user.getCreationDate());
+        userDto.setLastEditDate(user.getLastEditDate());
+        userDto.setRole(user.getRole());
+        return userDto;
     }
-
 }
 

@@ -1,7 +1,10 @@
 package ru.green.nca.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -34,6 +37,7 @@ public class User {
     private Instant lastEditDate;
     @Column(name = "id_role")
     private UserRole role;
+
     public User(String username, String password) {
         this.username = username;
         this.password = password;

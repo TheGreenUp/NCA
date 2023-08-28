@@ -11,6 +11,7 @@ public enum UserRole {
     UserRole(int value) {
         this.value = value;
     }
+
     public int getValue() {
         return value;
     }

@@ -25,7 +25,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
-@Profile(value = "!test")
+@Profile(value = "test")
 public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JWTFilter jwtFilter;
@@ -44,18 +44,11 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsService)
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.GET, "/api/news/**", "/api/comments/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                                .requestMatchers("/api/news/**").hasAnyRole(UserRole.JOURNALIST.name(), UserRole.ADMIN.name())
-
-                                .requestMatchers("/api/comments/**").hasAnyRole(UserRole.SUBSCRIBER.name(), UserRole.ADMIN.name())
-
-                                .anyRequest().hasRole(UserRole.ADMIN.name())
+                                .anyRequest().permitAll()
                 )
                 .formLogin(withDefaults())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

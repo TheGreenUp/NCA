@@ -5,8 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.green.nca.dto.UserDto;
 import ru.green.nca.entity.User;
 import ru.green.nca.enums.UserRole;
+import ru.green.nca.repository.CommentRepository;
 import ru.green.nca.repository.UserRepository;
 import ru.green.nca.security.UserDetailsImpl;
 import ru.green.nca.service.impl.UserServiceImpl;
@@ -39,17 +38,16 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private ModelMapper modelMapper;
+    private CommentRepository commentRepository;
 
     User USER = new User(1, "TheGreenUp", "encodedPassword", "Даниил",
             "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
-    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "encodedPassword", "Даниил",
+    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "Даниил",
             "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
 
     @Test
     public void getByIdTest() {
         when(userRepository.findById(any())).thenReturn(Optional.of(USER));
-        when(modelMapper.map(any(), any())).thenReturn(USER_DTO);
 
         UserDto userById = userService.getUserById(5);
         assertNotNull(userById);
@@ -63,11 +61,11 @@ public class UserServiceTest {
         Page<User> UserPage = new PageImpl<>(List.of(USER));
         when(userRepository.findAll(pageable)).thenReturn(UserPage);
 
-        List<User> User = this.userService.getAllUsers(0, 10);
+        List<UserDto> User = this.userService.getAllUsers(0, 10);
 
         assertNotNull(User);
         assertEquals(1, User.size());
-        assertEquals(USER, User.get(0));
+        assertEquals(USER_DTO, User.get(0));
     }
 
     @Test
@@ -76,11 +74,11 @@ public class UserServiceTest {
         PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
         when(passwordEncoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 
-        UserService userService = new UserServiceImpl(userRepository, passwordEncoderMock, modelMapper);
+        UserService userService = new UserServiceImpl(userRepository, commentRepository, passwordEncoderMock);
 
         when(userRepository.save(eq(USER))).thenReturn(USER);
 
-        User createdUser = userService.createUser(USER_DTO);
+        UserDto createdUser = userService.createUser(USER_DTO);
 
         assertNotNull(createdUser);
         assertEquals(USER.getId(), createdUser.getId());
@@ -95,13 +93,13 @@ public class UserServiceTest {
         PasswordEncoder passwordEncoderMock = mock(PasswordEncoder.class);
         when(passwordEncoderMock.encode(any(CharSequence.class))).thenReturn("encodedPassword");
 
-        UserServiceImpl userService = new UserServiceImpl(userRepository, passwordEncoderMock, modelMapper);
+        UserServiceImpl userService = new UserServiceImpl(userRepository,commentRepository,passwordEncoderMock);
 
 
         when(userRepository.findById(1)).thenReturn(Optional.of(USER));
         when(userRepository.save(USER)).thenReturn(USER);
 
-        User updatedUser = userService.updateUser(1, USER_DTO);
+        UserDto updatedUser = userService.updateUser(1, USER_DTO);
 
         assertNotNull(updatedUser);
         assertEquals(USER.getId(), updatedUser.getId());
@@ -120,6 +118,5 @@ public class UserServiceTest {
         UserDetails userDetails = new UserDetailsImpl(testUser); // Создаем UserDetailsImpl для тестового пользователя
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication); // Устанавливаем аутентификацию для текущего теста
-
     }
 }

@@ -15,13 +15,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import ru.green.nca.security.JWTUtil;
 
 import java.io.IOException;
-
+/**
+ * Фильтр, который обрабатывает JWT токены для аутентификации пользователей.
+ */
 @AllArgsConstructor
 @Component
 public class JWTFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Выполняет фильтрацию для обработки JWT токенов и аутентификации пользователей.
+     *
+     * @param request      HTTP-запрос.
+     * @param response     HTTP-ответ.
+     * @param filterChain цепочка фильтров.
+     * @throws ServletException Если произошла ошибка во время обработки запроса.
+     * @throws IOException      Если произошла ошибка ввода-вывода.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // Получение JWT из заголовка "Authorization"

@@ -13,11 +13,12 @@ import ru.green.nca.repository.UserRepository;
  */
 @Service
 @AllArgsConstructor
-@Profile(value = "default")
+//@Profile(value = "default")
 public class RegistrationServiceImpl {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
     /**
      * Регистрация нового пользователя в системе.
      *
@@ -28,6 +29,7 @@ public class RegistrationServiceImpl {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
+
     /**
      * Проверка существования пользователя с заданным именем пользователя.
      *

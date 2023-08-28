@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import ru.green.nca.dto.CommentDto;
 import ru.green.nca.entity.Comment;
 import ru.green.nca.security.JWTUtil;
@@ -40,36 +41,36 @@ public class CommentControllerTest {
 
     @Test
     public void getAllCommentTest() throws Exception {
-        when(commentService.getComments(eq(0), eq(10))).thenReturn(List.of(COMMENT));
+        when(commentService.getComments(eq(0), eq(10))).thenReturn(List.of(COMMENT_DTO));
         //сверху мы описываем поведение, что будет, если передадим 0 и 10 в качестве параметров
         //а снизу мы вызываем с этими параметрами, на что получаем результат из thenReturn()
         this.mockMvc.perform(get("/api/comments?page=0&size=10"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("[" + JsonConverter.asJsonString(COMMENT) + "]"));
+                .andExpect(content().string("[" + JsonConverter.asJsonString(COMMENT_DTO) + "]"));
     }
 
     @Test
     public void getCommentByIdTest() throws Exception {
-        when(commentService.getCommentById(eq(3))).thenReturn(COMMENT);
+        when(commentService.getCommentById(eq(3))).thenReturn(COMMENT_DTO);
         this.mockMvc.perform(get("/api/comments/3"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string(JsonConverter.asJsonString(COMMENT)));
+                .andExpect(content().string(JsonConverter.asJsonString(COMMENT_DTO)));
     }
 
     @Test
     public void createCommentTest() throws Exception {
-        when(commentService.createComment(COMMENT_DTO)).thenReturn(COMMENT);
+        when(commentService.createComment(COMMENT_DTO)).thenReturn(COMMENT_DTO);
         this.mockMvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonConverter.asJsonString(COMMENT_DTO)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string(JsonConverter.asJsonString(COMMENT)));
+                .andExpect(content().string(JsonConverter.asJsonString(COMMENT_DTO)));
     }
 
     @Test
@@ -81,14 +82,14 @@ public class CommentControllerTest {
 
     @Test
     public void updateCommentTest() throws Exception {
-        when(commentService.updateComment(eq(1), eq(COMMENT_DTO))).thenReturn(COMMENT);
+        when(commentService.updateComment(eq(1), eq(COMMENT_DTO))).thenReturn(COMMENT_DTO);
         mockMvc.perform(put("/api/comments/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonConverter.asJsonString(COMMENT_DTO)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string(JsonConverter.asJsonString(COMMENT)));
+                .andExpect(content().string(JsonConverter.asJsonString(COMMENT_DTO)));
         verify(commentService).updateComment(eq(1), eq(COMMENT_DTO));
     }
 }

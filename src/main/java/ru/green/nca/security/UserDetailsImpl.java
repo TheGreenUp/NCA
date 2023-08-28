@@ -9,6 +9,7 @@ import ru.green.nca.entity.User;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
 @Slf4j
 public class UserDetailsImpl implements UserDetails {
     private final User user;
@@ -34,6 +35,7 @@ public class UserDetailsImpl implements UserDetails {
     public String getPassword() {
         return this.user.getPassword();
     }
+
     @Override
     public String getUsername() {
         return this.user.getUsername();
@@ -58,7 +60,8 @@ public class UserDetailsImpl implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-    public User getUser(){
+
+    public User getUser() {
         return this.user;
     }
 }

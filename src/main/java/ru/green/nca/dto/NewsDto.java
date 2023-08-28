@@ -1,12 +1,16 @@
 package ru.green.nca.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class NewsDto {
-    private int id;
+    private Integer id;
     private String title;
     private String text;
     private Instant creationDate;

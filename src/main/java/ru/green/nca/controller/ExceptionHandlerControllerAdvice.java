@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.green.nca.exceptions.*;
+
 /**
  * Обработчик исключений для контроллеров.
  */
@@ -24,6 +25,7 @@ public class ExceptionHandlerControllerAdvice {
         errorObject.setTimestamp(System.currentTimeMillis());
         return new ResponseEntity<>(errorObject, HttpStatus.NOT_FOUND);
     }
+
     /**
      * Обрабатывает исключение {@link NoDataFoundException}.
      *
@@ -38,6 +40,7 @@ public class ExceptionHandlerControllerAdvice {
         errorObject.setTimestamp(System.currentTimeMillis());
         return new ResponseEntity<>(errorObject, HttpStatus.OK);
     }
+
     /**
      * Обрабатывает исключение {@link ConflictException}.
      *
@@ -52,6 +55,7 @@ public class ExceptionHandlerControllerAdvice {
         errorObject.setTimestamp(System.currentTimeMillis());
         return new ResponseEntity<>(errorObject, HttpStatus.CONFLICT);
     }
+
     /**
      * Обрабатывает исключение {@link ForbiddenException}.
      *

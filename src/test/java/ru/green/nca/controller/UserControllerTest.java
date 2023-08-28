@@ -38,12 +38,12 @@ public class UserControllerTest {
     private JWTUtil jwtUtil;
     User USER = new User(1, "TheGreenUp", "12345678", "Даниил",
             "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
-    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "12345678", "Даниил",
+    UserDto USER_DTO = new UserDto(1, "TheGreenUp", "Даниил",
             "Гринь", "Сергеевич", null, null, UserRole.ADMIN);
 
     @Test
     public void getAllUserTest() throws Exception {
-        when(userService.getAllUsers(eq(0), eq(10))).thenReturn(List.of(USER));
+        when(userService.getAllUsers(eq(0), eq(10))).thenReturn(List.of(USER_DTO));
         this.mockMvc.perform(get("/api/users?page=0&size=10"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -61,7 +61,7 @@ public class UserControllerTest {
 
     @Test
     public void createUserTest() throws Exception {
-        when(userService.createUser(USER_DTO)).thenReturn(USER);
+        when(userService.createUser(USER_DTO)).thenReturn(USER_DTO);
         String UserJson = JsonConverter.asJsonString(USER);
         this.mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +79,7 @@ public class UserControllerTest {
 
     @Test
     public void updateUserTest() throws Exception {
-        when(userService.updateUser(eq(1), eq(USER_DTO))).thenReturn(USER);
+        when(userService.updateUser(eq(1), eq(USER_DTO))).thenReturn(USER_DTO);
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
